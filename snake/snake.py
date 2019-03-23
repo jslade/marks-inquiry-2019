@@ -5,19 +5,22 @@ import sys
 
 class SnakeGame(object):
     def main(self, args):
-        self.board = Board(60, 20)
-        self.snake = Snake(self.board)
-        
-        self.renderer = BoardRenderer()
-        self.stepper = Stepper()
+        state = GameState(60, 20)
+        renderer = BoardRenderer(state)
+        stepper = Stepper(state)
 
         while True:
-            self.renderer.draw(self.board)
-            self.stepper.step()
-            if self.stepper.finished():
+            renderer.draw()
+            stepper.step()
+            if stepper.is_finished():
                 break
 
 
+class GameState(object):
+    def __init__(self, width, height):
+        self.board = Board(width, height)
+        self.snake = Snake(self.board)
+    
 class Board(object):
     def __init__(self, width, height):
         self.width = width
@@ -50,7 +53,7 @@ class Board(object):
         return self.max_y() / 2
 
     def set_at(self, x, y, what):
-        index = self.width * y + x
+        index = (self.width * y) + x
 
         existing = self.grid[index]
         self.grid[index] = what
@@ -90,7 +93,7 @@ class SnakeSegment(Piece):
 
 
 class SnakeHead(SnakeSegment):
-    char = 'O'
+    char = '>'
 
 
 class Snake(object):
@@ -98,17 +101,41 @@ class Snake(object):
         self.head = SnakeHead()
         self.tail = self.head
         self.length = 1
+        self.dead = False
 
         board.set_at(board.center_x(), board.center_y(), self.head)
 
+    def can_move_right(self, board):
+        piece = board.get_at(self.head.x + 1, self.head.y)
+        if piece is None:
+            return True
+        else:
+            return False
+
+    def move_right(self, board):
+        head_x = self.head.x
+        head_y = self.head.y
+        board.set_at(head_x, head_y, None)
+        board.set_at(head_x + 1, head_y, self.head)
 
 
+    def die(self):
+        self.dead = True
+
+    def is_dead(self):
+        return self.dead == True
+
+    
 class BoardRenderer(object):
-    def draw(self, board):
-        for y in range(0, board.max_y()+1):
+    def __init__(self, state):
+        self.state = state
+        self.board = state.board
+
+    def draw(self):
+        for y in range(0, self.board.max_y()+1):
             row = ''
-            for x in range(0, board.max_x()+1):
-                row += self.char_for(board.get_at(x, y))
+            for x in range(0, self.board.max_x()+1):
+                row += self.char_for(self.board.get_at(x, y))
             print row
 
     def char_for(self, piece):
@@ -119,12 +146,25 @@ class BoardRenderer(object):
 
 
 class Stepper(object):
-    def step(self):
-        pass
+    def __init__(self, state):
+        self.state = state
+        self.board = state.board
+        self.snake = state.snake
 
-    def finished(self):
-        return True
+    def step(self):
+        self.move_snake()
+
+    def move_snake(self):
+        if self.snake.can_move_right(self.board):
+            self.snake.move_right(self.board)
+        else:
+            self.snake.die()
+    
+    def is_finished(self):
+        return self.snake.is_dead()
 
 
 if __name__ == '__main__':
     SnakeGame().main(sys.argv[1:])
+
+    
