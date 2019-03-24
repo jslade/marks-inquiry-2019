@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
 import sys
-import pygame
 
-from snake.screen import Screen
-from snake.game_state import GameState
 from snake.game_loop import GameLoop
+from snake.game_object import GameObject
+from snake.game_state import GameState
+from snake.screen import Screen
 
-class SnakeGame(object):
+class SnakeGame(GameObject):
     def __init__(self):
-        self.width = 60
-        self.height = 60
+        self.width = 600
+        self.height = 600
         self.scale = 10
 
     def main(self, args):
@@ -22,10 +22,8 @@ class SnakeGame(object):
         pass
 
     def init_game(self):
-        pygame.init()
-
-        state = GameState(self.width, self.height)
-        screen = Screen(state, self.scale)
+        state = GameState(self.width, self.height, self.scale)
+        screen = Screen(state)
         return GameLoop(state, screen)
 
 if __name__ == '__main__':
