@@ -95,7 +95,7 @@ class SnakeSegment(Piece):
 
 
 class SnakeHead(SnakeSegment):
-    char = '>'
+    char = '0'
 
 
 class Snake(object):
