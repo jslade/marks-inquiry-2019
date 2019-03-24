@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 
 class SnakeGame(object):
     def main(self, args):
@@ -11,6 +12,7 @@ class SnakeGame(object):
 
         while True:
             renderer.draw()
+            time.sleep(0.5)
             stepper.step()
             if stepper.is_finished():
                 break
@@ -132,6 +134,7 @@ class BoardRenderer(object):
         self.board = state.board
 
     def draw(self):
+        print("\033[2J")
         for y in range(0, self.board.max_y()+1):
             row = ''
             for x in range(0, self.board.max_x()+1):
