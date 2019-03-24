@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import sys
@@ -20,7 +20,7 @@ class GameState(object):
     def __init__(self, width, height):
         self.board = Board(width, height)
         self.snake = Snake(self.board)
-    
+
 class Board(object):
     def __init__(self, width, height):
         self.width = width
@@ -47,24 +47,24 @@ class Board(object):
         return self.height - 1
 
     def center_x(self):
-        return self.max_x() / 2
+        return int(self.max_x() / 2)
 
     def center_y(self):
-        return self.max_y() / 2
+        return int(self.max_y() / 2)
 
     def set_at(self, x, y, what):
-        index = (self.width * y) + x
+        index = int((self.width * y) + x)
 
         existing = self.grid[index]
         self.grid[index] = what
-        
+
         if existing is not None:
             existing.removed()
         if what is not None:
             what.placed(x, y)
 
     def get_at(self, x, y):
-        index = self.width * y + x
+        index = int((self.width * y) + x)
         return self.grid[index]
 
 
@@ -86,8 +86,8 @@ class Piece(object):
 
 class Obstacle(Piece):
     char = '#'
-    
-    
+
+
 class SnakeSegment(Piece):
     char = 'O'
 
@@ -125,7 +125,7 @@ class Snake(object):
     def is_dead(self):
         return self.dead == True
 
-    
+
 class BoardRenderer(object):
     def __init__(self, state):
         self.state = state
@@ -136,7 +136,7 @@ class BoardRenderer(object):
             row = ''
             for x in range(0, self.board.max_x()+1):
                 row += self.char_for(self.board.get_at(x, y))
-            print row
+            print(row)
 
     def char_for(self, piece):
         if piece is None:
@@ -159,7 +159,7 @@ class Stepper(object):
             self.snake.move_right(self.board)
         else:
             self.snake.die()
-    
+
     def is_finished(self):
         return self.snake.is_dead()
 
@@ -167,4 +167,4 @@ class Stepper(object):
 if __name__ == '__main__':
     SnakeGame().main(sys.argv[1:])
 
-    
+
