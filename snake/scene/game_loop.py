@@ -22,7 +22,11 @@ class GameLoop(GameObject):
         self.running = True
 
         while self.running:
-            clock.tick(self.fps)
+            try:
+                clock.tick(self.fps)
+            except KeyboardInterrupt:
+                self.post(pygame.QUIT)
+
             millis = clock.get_time()
 
             self.process_events()
