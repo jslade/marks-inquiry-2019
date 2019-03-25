@@ -27,6 +27,9 @@ class GameObject(object):
     mouse = pygame.mouse
     time = pygame.time
 
+    Rect = pygame.Rect
+    Vector2 = pygame.math.Vector2
+
 
     # Events
     # ------------------------------------------------------
