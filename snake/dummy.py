@@ -1,4 +1,4 @@
-from snake.scene.game_scene import GameScene
+from .engine.game_scene import GameScene
 
 class Dummy(GameScene):
     def on_activated(self, screen):

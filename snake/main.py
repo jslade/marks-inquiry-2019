@@ -2,9 +2,9 @@
 
 import sys
 
-from .scene.game_loop import GameLoop
-from .scene.game_object import GameObject
-from .scene.game_screen import GameScreen
+from .engine.game_loop import GameLoop
+from .engine.game_object import GameObject
+from .engine.game_screen import GameScreen
 
 #from .start_scene import StartScene
 from .dummy import Dummy
