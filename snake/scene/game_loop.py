@@ -8,6 +8,13 @@ class GameLoop(GameObject):
         self.fps = 60
         self.scene = None
 
+        self.fps_event_id = self.define_event()
+        self.time.set_timer(self.fps_event_id, 5000)
+        self.on_event(self.fps_event_id, self.print_fps)
+
+    def print_fps(self, event):
+        self.log("FPS = %s" % (int(self.clock.get_fps())))
+
     def set_scene(self, new_scene):
         if self.scene:
             self.scene.deactivate()
@@ -17,17 +24,17 @@ class GameLoop(GameObject):
             self.scene.activate(self.screen)
 
     def run(self):
-        clock = self.time.Clock()
+        self.clock = self.time.Clock()
 
         self.running = True
 
         while self.running:
             try:
-                clock.tick(self.fps)
+                self.clock.tick(self.fps)
             except KeyboardInterrupt:
                 self.post(pygame.QUIT)
 
-            millis = clock.get_time()
+            millis = self.clock.get_time()
 
             self.process_events()
             if self.scene:
