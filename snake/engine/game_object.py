@@ -1,5 +1,6 @@
 import pygame
 import random
+import sys
 
 class GameObject(object):
     @staticmethod
@@ -72,6 +73,7 @@ class GameObject(object):
 
     def log(self, msg):
         print(msg)
+        sys.stdout.flush()
 
     # Random numbers:
     # ------------------------------------------------------
