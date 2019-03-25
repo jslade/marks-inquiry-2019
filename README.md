@@ -9,3 +9,8 @@ this is america
 
 
 ### LEbron JAmes
+## How to Run It
+
+```bash
+python3 -m snake.main
+```
