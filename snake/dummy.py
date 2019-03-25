@@ -8,22 +8,24 @@ class Dummy(GameScene):
         self.x = self.width / 2.0
         self.y = self.height / 2.0
 
-        self.dx = self.random_float(-1.0, 1.0)
-        self.dy = self.random_float(-1.0, 1.0)
-        self.speed = self.random_float(30.0, 50.0)
+        self.v = self.math.Vector2(
+            self.random_float(-1.0, 1.0),
+            self.random_float(-1.0, 1.0)
+        ).normalize()
+        self.v *= self.random_float(30.0, 50.0)
 
-        self.log("activated with speed = %s" % (self.speed))
+        self.log("activated with v = %s (%s)" % (self.v, self.v.length()))
 
     def tick(self, millis):
-        delta = self.speed * (millis / 60.0)
+        delta = self.v * (millis / 60.0)
 
-        self.x += self.dx * delta
+        self.x += delta.x
         if self.x >= self.width or self.x <= 0.0:
-            self.dx *= -1.0
+            self.v.x *= -1.0
 
-        self.y += self.dy * delta
+        self.y += delta.y
         if self.y >= self.height or self.y <= 0.0:
-            self.dy *= -1.0
+            self.v.y *= -1.0
 
     def render(self, surface):
         surface.fill( (0,0,0))
