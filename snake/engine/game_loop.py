@@ -8,9 +8,17 @@ class GameLoop(GameObject):
         self.fps = 60
         self.scene = None
 
+        self.on_event(pygame.QUIT, self.process_quit)
+        self.on_event(pygame.KEYDOWN, self.process_key_down)
+        self.on_event(pygame.MOUSEBUTTONDOWN, self.process_mouse_down)
+        self.on_event(pygame.MOUSEBUTTONUP, self.process_mouse_up)
+        self.on_event(pygame.MOUSEMOTION, self.process_mouse_motion)
+
+        # Special periodic FPS event / timer:
         self.fps_event_id = self.define_event()
         self.time.set_timer(self.fps_event_id, 5000)
         self.on_event(self.fps_event_id, self.print_fps)
+
 
     def print_fps(self, event):
         self.log("FPS = %s" % (int(self.clock.get_fps())))
@@ -41,18 +49,12 @@ class GameLoop(GameObject):
                 self.scene.tick(millis)
             self.screen.render(self.scene)
 
+
     def process_events(self):
         for event in self.event.get():
             self.process_one_event(event)
 
     def process_one_event(self, event):
-        if event.type == pygame.QUIT:
-            self.running = False
-            return True
-
-        if event.type == pygame.KEYDOWN:
-            self.process_key_down(event)
-
         GameLoop.process_event(event)
 
     def process_key_down(self, event):
@@ -70,3 +72,19 @@ class GameLoop(GameObject):
         pressed_keys = pygame.key.get_pressed()
         alt_pressed = pressed_keys[pygame.K_LALT] or pressed_keys[pygame.K_RALT]
         return alt_pressed
+
+    def process_quit(self, event):
+        self.running = False
+
+    def process_mouse_down(self, event):
+        if self.scene:
+            self.scene.on_mouse_down(event)
+
+    def process_mouse_up(self, event):
+        if self.scene:
+            self.scene.on_mouse_up(event)
+
+    def process_mouse_motion(self, event):
+        if self.scene:
+            self.scene.on_mouse_moved(event)
+            
