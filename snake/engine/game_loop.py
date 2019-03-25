@@ -4,6 +4,8 @@ import pygame
 
 class GameLoop(GameObject):
     def __init__(self, screen):
+        GameObject.__init__(self, 'GameLoop')
+
         self.screen = screen
         self.fps = 60
         self.scene = None
@@ -87,4 +89,4 @@ class GameLoop(GameObject):
     def process_mouse_motion(self, event):
         if self.scene:
             self.scene.on_mouse_moved(event)
-            
+

@@ -1,15 +1,33 @@
-import pygame
+import pygame as _pygame
 import random
 import sys
+import weakref
 
 class GameObject(object):
     @staticmethod
     def init():
-        pygame.init()
+        _pygame.init()
         GameObject.seed()
 
+    named_instances = {}
+
+    @staticmethod
+    def find_by_name(name):
+        ref = GameObject.named_instances.get(name, None)
+        if ref is None:
+            return None
+
+        obj = ref()
+        if obj is None:
+            del GameObject.named_instances[name]
+            return None
+
+        return obj
+
+
     def __init__(self, name = None):
-        self.name = name
+        if name:
+            GameObject.named_instances[name] = weakref.ref(self)
 
     # Pygame helpers
     # This allows e.g. 'self.draw' to be used in
@@ -17,25 +35,26 @@ class GameObject(object):
     # also obviating the need for 'import pygame'
     # ------------------------------------------------------
 
-    display = pygame.display
-    draw = pygame.draw
-    event = pygame.event
-    font = pygame.font
-    image = pygame.image
-    key = pygame.key
-    math = pygame.math
-    mixer = pygame.mixer
-    mouse = pygame.mouse
-    time = pygame.time
+    pygame = _pygame
+    display = _pygame.display
+    draw = _pygame.draw
+    event = _pygame.event
+    font = _pygame.font
+    image = _pygame.image
+    key = _pygame.key
+    math = _pygame.math
+    mixer = _pygame.mixer
+    mouse = _pygame.mouse
+    time = _pygame.time
 
-    Rect = pygame.Rect
-    Vector2 = pygame.math.Vector2
+    Rect = _pygame.Rect
+    Vector2 = _pygame.math.Vector2
 
 
     # Events
     # ------------------------------------------------------
 
-    next_event_id = pygame.USEREVENT + 1
+    next_event_id = _pygame.USEREVENT + 1
     event_listeners = {}
 
     @classmethod
@@ -61,11 +80,11 @@ class GameObject(object):
 
     def post(self, event_id, dict=None, **attrs):
         if dict:
-            event = pygame.event.Event(event_id, dict)
+            event = self.pygame.event.Event(event_id, dict)
         else:
-            event = pygame.event.Event(event_id, **attrs)
+            event = self.pygame.event.Event(event_id, **attrs)
 
-        pygame.event.post(event)
+        self.pygame.event.post(event)
 
 
     # Logging to the console for debugging:

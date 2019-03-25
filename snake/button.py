@@ -8,7 +8,7 @@ class Button(BoundedObject):
         self.hover_color = hover_color or self.color
         self.text_color = text_color
 
-        self._font = self.font.Font(self.font.get_default_font(), 12)
+        self.font = self.pygame.font.Font(self.font.get_default_font(), 12)
 
         self.set_text(text)
         self.action = action
@@ -16,7 +16,7 @@ class Button(BoundedObject):
 
     def set_text(self, text):
         self.text = text
-        self.rendered_text = self._font.render(
+        self.rendered_text = self.font.render(
             self.text,
             True,
             self.text_color,

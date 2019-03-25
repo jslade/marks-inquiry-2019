@@ -2,9 +2,9 @@ from .game_object import GameObject
 
 class GameScreen(GameObject):
     def __init__(self, width, height):
-        GameObject.init()
+        GameObject.__init__(self, 'GameScreen')
 
-        GameObject.__init__(self, 'screen')
+        GameObject.init()
 
         self.width = width
         self.height = height
