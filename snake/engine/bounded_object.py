@@ -5,6 +5,7 @@ class BoundedObject(GameObject):
         GameObject.__init__(self)
         self.rect = self.Rect(0,0,0,0)
         self.mouse_in = False
+        self.mouse_down = False
 
 
     def is_touching(self, what):
@@ -30,17 +31,22 @@ class BoundedObject(GameObject):
         pass
 
 
+    def update_bounds(self):
+        pass
+
+
     def on_mouse_enter(self, event):
         self.mouse_in = True
 
     def on_mouse_exit(self, event):
         self.mouse_in = False
+        self.mouse_down = False
 
     def on_mouse_down(self, event):
-        pass
+        self.mouse_down = True
 
     def on_mouse_up(self, event):
-        pass
+        self.mouse_down = False
 
     def on_mouse_click(self, event):
         pass

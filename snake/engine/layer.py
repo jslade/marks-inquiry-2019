@@ -13,6 +13,7 @@ class Layer(GameObject):
 
     def add_object(self, obj):
         self.objects.append(obj)
+        obj.update_bounds()
 
 
     def remove_object(self, obj):
@@ -71,7 +72,6 @@ class Layer(GameObject):
         for obj in self.objects:
             if obj.is_touching(location):
                 new_in_obj = obj
-                break
 
         if old_in_obj != new_in_obj:
             if old_in_obj:
