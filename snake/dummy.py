@@ -8,7 +8,7 @@ class Dummy(GameScene):
         self.x = self.width / 2.0
         self.y = self.height / 2.0
 
-        self.v = self.math.Vector2(
+        self.v = self.Vector2(
             self.random_float(-1.0, 1.0),
             self.random_float(-1.0, 1.0)
         ).normalize()
