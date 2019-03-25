@@ -19,6 +19,12 @@ class GameObject(object):
     display = pygame.display
     draw = pygame.draw
     event = pygame.event
+    font = pygame.font
+    image = pygame.image
+    key = pygame.key
+    math = pygame.math
+    mixer = pygame.mixer
+    mouse = pygame.mouse
     time = pygame.time
 
 
