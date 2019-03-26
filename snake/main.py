@@ -10,8 +10,8 @@ from .engine.game_screen import GameScreen
 from .args import ArgParser
 from .playground import Playground
 from .settings import Settings
+from .start_scene import StartScene
 
-#from .start_scene import StartScene
 
 
 #from .pubnub_manager import PubNubManager
@@ -39,7 +39,7 @@ class SnakeGame(GameObject):
         if self.opts.playground:
             loop.set_scene(Playground())
         else:
-            pass#loop.set_scene(StartScene())
+            loop.set_scene(StartScene())
 
         return loop
 
