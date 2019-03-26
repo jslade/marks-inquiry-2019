@@ -9,6 +9,17 @@ this is america
 
 
 ### LEbron JAmes
+
+
+## Setup
+
+Install some dependencies
+
+```bash
+python3 -m pip install -U pygame --user
+python3 -m pip install -U pubnub --user
+```
+
 ## How to Run It
 
 ```bash
