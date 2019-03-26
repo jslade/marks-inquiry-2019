@@ -10,7 +10,7 @@ from .engine.game_screen import GameScreen
 from .dummy import Dummy
 
 
-from .pubnub_manager import PubNubManager
+#from .pubnub_manager import PubNubManager
 
 
 class SnakeGame(GameObject):
@@ -23,14 +23,14 @@ class SnakeGame(GameObject):
         loop = self.init_game()
         loop.run()
 
-        self.pubnub.shutdown()
+        #self.pubnub.shutdown()
 
 
     def parse_args(self, args):
         pass
 
     def init_game(self):
-        self.pubnub = PubNubManager()
+        #self.pubnub = PubNubManager()
 
         screen = GameScreen(self.width, self.height)
         loop = GameLoop(screen)
