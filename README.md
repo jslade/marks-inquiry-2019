@@ -25,7 +25,7 @@ python3 -m pip install -U mamba expects doublex doublex-expects --user
 ## How to Run It
 
 ```bash
-python3 -m snake.main
+py -m snake.main
 ```
 
 ## Running specs
