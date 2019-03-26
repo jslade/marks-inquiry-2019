@@ -10,11 +10,23 @@ class Layer(GameObject):
         self.mouse_down_in_obj = None
         self.mouse_up_in_obj = None
 
+        self.background_color = None
+        self.background_surface = None
+
+
+    def set_background(self, what):
+        if isinstance(what, tuple):
+            self.background_color = what
+            self.background_surface = None
+
+        elif isinstance(what, self.pygame.Surface):
+            self.background_surface = what
+            self.background_color = None
+
 
     def add_object(self, obj):
         self.objects.append(obj)
         obj.update_bounds()
-
 
     def remove_object(self, obj):
         self.objects.remove(obj)
@@ -24,7 +36,18 @@ class Layer(GameObject):
         for obj in self.objects:
             obj.tick(millis)
 
+
     def render(self, surface):
+        self.render_background(surface)
+        self.render_objects(surface)
+
+    def render_background(self, surface):
+        if self.background_color:
+            surface.fill(self.background_color)
+        elif self.background_surface:
+            surface.blit(self.background_surface)
+
+    def render_objects(self, surface):
         for obj in self.objects:
             obj.render(surface)
 

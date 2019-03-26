@@ -6,6 +6,7 @@ from .engine.layer import Layer
 class Dummy(GameScene):
     def on_activated(self, screen):
         circle_layer = Layer()
+        circle_layer.set_background((0,0,0))
         circle_layer.add_object(BouncyCircle(screen))
         self.add_layer(circle_layer)
 
@@ -58,8 +59,6 @@ class BouncyCircle(BoundedObject):
             self.v.y *= -1.0
 
     def render(self, surface):
-        surface.fill( (0,0,0)) # TODO: should be in scene
-
         color = (0, 0, 128)
         self.draw.circle(surface, color, self.rect.center, 50)
 
