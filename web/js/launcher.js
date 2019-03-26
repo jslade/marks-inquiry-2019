@@ -3,7 +3,8 @@ var showJoinCode = function() {
 
   var link =
     window.location.protocol + "//" +
-    window.location.hostname +
+    window.location.hostname + ":" +
+    window.location.port +
     "/controller.html"
 
   new QRCode($('#qrcode')[0], link);
