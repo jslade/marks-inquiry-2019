@@ -1,6 +1,7 @@
 var knob = {};
 var rim = {};
-var rim_radius;
+
+var pubnum = window.pubnub;
 
 
 var relative_location = function(elem, evt) {
@@ -18,10 +19,14 @@ var dragKnob = function(loc) {
 
   var x = loc.x - rim.radius;
   var y = loc.y - rim.radius;
-  console.log(x, y);
 
   knob.el.attr("cx", knob.center_x + x);
   knob.el.attr("cy", knob.center_y + y);
+
+  pubnub.publish({
+    channel: 'launcher',
+    message: { knob: { x: x, y: y } }
+  });
 };
 
 var resetKnob = function() {

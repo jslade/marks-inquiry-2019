@@ -13,4 +13,9 @@ var showJoinCode = function() {
 
 $(document).ready(function () {
   showJoinCode();
+
+  var pubnub = window.pubnub;
+  pubnub.set_presence("launcher", function(status, response) {
+    $("#presence.span").text(response);
+  })
 });
