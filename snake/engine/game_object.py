@@ -66,17 +66,19 @@ class GameObject(object):
 
     @classmethod
     def on_event(klass, event_id, sub):
-        klass.event_listeners[event_id] = sub
+        if not event_id in klass.event_listeners:
+            klass.event_listeners[event_id] = []
+        klass.event_listeners[event_id].append(sub)
 
     @classmethod
     def process_event(klass, event):
         sub = None
         try:
-            sub = klass.event_listeners[event.type]
+            subs = klass.event_listeners[event.type]
         except KeyError:
             return
 
-        if sub:
+        for sub in subs:
             sub(event)
 
     def post(self, event_id, dict=None, **attrs):
