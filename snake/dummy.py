@@ -4,6 +4,9 @@ from .engine.layer import Layer
 from snake.snake import Snake
 from snake.snake_renderer import SnakeRenderer
 
+from snake.apple import Apple
+
+
 class Dummy(GameScene):
     def on_activated(self, screen):
         snake_layer = Layer()
@@ -19,6 +22,10 @@ class Dummy(GameScene):
 
         self.ticks = 0
 
+
+        self.apple = Apple()
+        self.apple.rect.topleft = (200,200)
+        snake_layer.add_object(self.apple)
 
     def tick(self, millis):
         GameScene.tick(self, millis)
