@@ -1,6 +1,8 @@
+from .settings import Settings
 from .snake import Snake
 
 from .engine.bounded_object import BoundedObject
+from .engine.colors import Colors
 
 
 class SnakeRenderer(BoundedObject):
@@ -8,7 +10,7 @@ class SnakeRenderer(BoundedObject):
         BoundedObject.__init__(self)
         self.snake = snake
         self.color = color
-        self.border_color = (255,255,255)
+        self.border_color = Colors.lighter(color, 0.20)
 
         self.prerender_segments()
 
@@ -18,7 +20,7 @@ class SnakeRenderer(BoundedObject):
 
 
     def prerender_segments(self):
-        width = Snake.segment_size * 2
+        width = Settings.snake_size * 2
         self.segment = self.Surface(
             (width, width),
             flags=self.pygame.SRCALPHA

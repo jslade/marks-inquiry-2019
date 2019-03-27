@@ -3,11 +3,11 @@ from .game_object import GameObject
 import pygame
 
 class GameLoop(GameObject):
-    def __init__(self, screen):
+    def __init__(self, screen, fps):
         GameObject.__init__(self, 'GameLoop')
 
         self.screen = screen
-        self.fps = 60
+        self.fps = fps
         self.scene = None
 
         self.on_event(pygame.QUIT, self.process_quit)

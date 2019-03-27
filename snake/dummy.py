@@ -1,10 +1,11 @@
 from .engine.game_scene import GameScene
 from .engine.layer import Layer
 
-from snake.snake import Snake
-from snake.snake_renderer import SnakeRenderer
+from .apple import Apple
+from .settings import Settings
+from .snake import Snake
+from .snake_renderer import SnakeRenderer
 
-from snake.apple import Apple
 
 
 class Dummy(GameScene):
@@ -14,11 +15,11 @@ class Dummy(GameScene):
         self.add_layer(snake_layer)
 
         self.snake = Snake()
-        self.snake.move_to(300, 300)
-        snake_view = SnakeRenderer(self.snake, (0, 100, 200))
+        self.snake.move_to(int(Settings.screen_width/2), int(Settings.screen_height/2))
+        snake_view = SnakeRenderer(self.snake, Settings.snake_colors[0])
         snake_layer.add_object(snake_view)
 
-        self.snake.set_velocity(.1, 0)
+        self.snake.set_velocity(Settings.snake_speed, 0)
 
         self.ticks = 0
 
