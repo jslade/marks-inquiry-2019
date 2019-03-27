@@ -1,32 +1,138 @@
-from snake.snake_head import SnakeHead
+from .engine.game_object import GameObject
 
-class Snake(object):
-    def __init__(self, board):
-        self.head = SnakeHead()
-        self.tail = self.head
-        self.length = 1
+class Snake(GameObject):
+
+    segment_distance = 10
+
+    growth_event_id = GameObject.define_event()
+    death_event_id = GameObject.define_event()
+
+    def __init__(self, length=3):
+        GameObject.__init__(self)
+
+        self.velocity = self.Vector2(0, 0)
+        self.head_vector = self.Vector2()
+
+        self.head_pt = None
+        self.tail_pt = None
+        self.length = 0
+
+        for i in range(length):
+            self.add_point(i*self.segment_distance, 0)
+
         self.dead = False
+        self.growing = 0
 
-        board.set_at(board.center_x(), board.center_y(), self.head)
-
-    def can_move_right(self, board):
-        piece = board.get_at(self.head.x + 1, self.head.y)
-        if piece is None:
-            return True
-        else:
-            return False
-
-    def move_right(self, board):
-        head_x = self.head.x
-        head_y = self.head.y
-        board.set_at(head_x, head_y, None)
-        board.set_at(head_x + 1, head_y, self.head)
-
+    def tick(self, millis):
+        self.slither(millis)
+        #self.check_collisions()
 
     def die(self):
         self.dead = True
+        self.post(self.death_event_id, snake=self)
 
     def is_dead(self):
         return self.dead == True
 
+    def set_velocity(self, speed, angle):
+        self.velocity.from_polar( (speed, angle) )
 
+    def turn(self, degrees):
+        self.velocity.rotate_ip(degrees)
+        self.head_vector.rotate_ip(degrees)
+
+    def slither(self, millis):
+        # Movement is done by growing the head vector at a fixed velocity
+        # Once the head vector is long enough, then move the body points
+        self.head_vector += self.velocity * millis
+        self.extend_head()
+
+    def extend_head(self):
+        # How far has the head moved from the last point?
+        len = self.head_vector.length()
+
+        # If the head has moved at least the distance of a new segment,
+        # then add a segment
+        if len >= self.segment_distance:
+            # The vec_to_head is a vector that is pointed in the direction
+            # of movement (the velocity vector), but the segment length long
+            vec_to_head = self.velocity.copy()
+            vec_to_head.scale_to_length(self.segment_distance)
+
+            # So now we'll add a new point that distance away from the last point
+            # and remove the tail piece (unless it's growing)
+            self.add_point_at_head(vec_to_head)
+            if self.remove_point_at_tail() is False:
+                self.post(self.growth_event_id, snake=self)
+
+            # Now lop off the segment length from the head vector,
+            # and repeat, in case the head vector is more than one
+            # segment long
+            self.head_vector -= vec_to_head
+            self.extend_head()
+
+    def add_point_at_head(self, vec_to_head):
+        self.add_point(
+            self.points[-1][0] + vec_to_head.x,
+            self.points[-1][1] + vec_to_head.y
+        )
+
+    def add_point(self, x, y):
+        pt = self.Point.get()
+        pt.x = x
+        pt.y = y
+
+        if self.head_pt:
+            self.head_pt.next = pt
+        self.head_pt = pt
+        self.length += 1
+
+    def remove_point_at_tail(self):
+        if self.growing > 0:
+            self.growing -= 1
+            return False
+
+        pt = self.tail_pt
+        self.tail_pt = pt.next
+        self.length -= 1
+
+        pt.recycle()
+
+
+    def render(self, surface):
+        pass
+
+
+
+    # Segments of the snake body are represented by the Point class
+    # The list of segments is managed as a singly-linked list,
+    # where new points are always added at the "tail" of the list
+    # (the snake's head), and points are removed from the "head"
+    # of the list (the snake's tail)
+    #
+    # Since adding/removing points on the body of the snake is
+    # a frequent operation, a slight optimization is to keep a
+    # pool of available point objects
+
+    class Point(object):
+        pool = None
+
+        @classmethod
+        def get(kls):
+            if kls.pool is None:
+                return kls()
+            else:
+                p = kls.pool
+                kls.pool = p.next
+                p.next = None
+                return p
+
+        @classmethod
+        def recycle(kls, p):
+            p.next = kls.pool
+            kls.pool = p
+
+        def __init__(self):
+            self.x = None
+            self.y = None
+            self.next = None
