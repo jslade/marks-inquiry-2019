@@ -3,7 +3,14 @@ from .game_object import GameObject
 class GameScene(GameObject):
     def __init__(self):
         GameObject.__init__(self)
+        self.offscreen_objects = []
         self.layers = []
+
+    def add_offscreen_object(self, obj):
+        self.offscreen_objects.append(obj)
+
+    def remove_offscreen_object(self, obj):
+        self.offscreen_objects.remove(obj)
 
     def add_layer(self, layer):
         self.layers.append(layer)
@@ -26,6 +33,8 @@ class GameScene(GameObject):
         pass
 
     def tick(self, millis):
+        for obj in self.offscreen_objects:
+            obj.tick(millis)
         for layer in self.layers:
             layer.tick(millis)
 
