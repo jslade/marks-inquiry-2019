@@ -30,18 +30,24 @@ class SnakeRenderer(BoundedObject):
             self.segment,
             self.color,
             (int(width / 2), int(width / 2)),
-            int(width / 2.5)
+            int(width / 2)
         )
 
         self.draw.circle(
             self.segment,
             self.border_color,
             (int(width / 2), int(width / 2)),
-            int(width / 2.5),
+            int(width / 2),
             2
         )
+
+        self.offset = int(width / 2)
 
 
     def render(self, surface):
         for segment in self.snake.segments():
-            surface.blit(self.segment, (segment.x, segment.y))
+            surface.blit(
+                self.segment,
+                (segment.x - self.offset,
+                 segment.y - self.offset)
+            )

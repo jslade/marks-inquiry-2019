@@ -36,6 +36,7 @@ class Snake(GameObject):
 
     def set_velocity(self, speed, angle):
         self.velocity.from_polar( (speed, angle) )
+        self.head_vector.x = self.head_vector.y = 0
 
     def turn(self, degrees):
         self.velocity.rotate_ip(degrees)

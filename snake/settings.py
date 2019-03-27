@@ -1,11 +1,11 @@
 
 class Settings(object):
-    screen_width = 640
-    screen_height = 480
+    screen_width = 800
+    screen_height = 600
     target_fps = 60
 
-    snake_size = 20
-    snake_speed = snake_size * 2 / 1000.0
+    snake_size = 10
+    snake_speed = snake_size * 10 / 1000.0
 
 
     snake_colors = [
