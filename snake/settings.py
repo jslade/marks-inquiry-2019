@@ -6,7 +6,7 @@ class Settings(object):
 
     snake_size = 10
     snake_speed = snake_size * 10 / 1000.0
-
+    snake_turn_rate = 180 / 1000.0
 
     snake_colors = [
       (0, 200, 100), # green
