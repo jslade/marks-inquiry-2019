@@ -1,7 +1,6 @@
 from .engine.game_object import GameObject
 
 class Snake(GameObject):
-
     segment_distance = 10
 
     growth_event_id = GameObject.define_event()
@@ -41,6 +40,10 @@ class Snake(GameObject):
         self.velocity.rotate_ip(degrees)
         self.head_vector.rotate_ip(degrees)
 
+    def queue_growth(self, units):
+        self.growing += units
+
+
     def slither(self, millis):
         # Movement is done by growing the head vector at a fixed velocity
         # Once the head vector is long enough, then move the body points
@@ -56,7 +59,7 @@ class Snake(GameObject):
         if len >= self.segment_distance:
             # The vec_to_head is a vector that is pointed in the direction
             # of movement (the velocity vector), but the segment length long
-            vec_to_head = self.velocity.copy()
+            vec_to_head = self.Vector2(self.velocity)
             vec_to_head.scale_to_length(self.segment_distance)
 
             # So now we'll add a new point that distance away from the last point
@@ -73,8 +76,8 @@ class Snake(GameObject):
 
     def add_point_at_head(self, vec_to_head):
         self.add_point(
-            self.points[-1][0] + vec_to_head.x,
-            self.points[-1][1] + vec_to_head.y
+            int(self.head_pt.x + vec_to_head.x),
+            int(self.head_pt.y + vec_to_head.y)
         )
 
     def add_point(self, x, y):
@@ -84,6 +87,8 @@ class Snake(GameObject):
 
         if self.head_pt:
             self.head_pt.next = pt
+        else:
+            self.tail_pt = pt
         self.head_pt = pt
         self.length += 1
 
@@ -96,7 +101,7 @@ class Snake(GameObject):
         self.tail_pt = pt.next
         self.length -= 1
 
-        pt.recycle()
+        self.Point.recycle(pt)
 
 
     def render(self, surface):

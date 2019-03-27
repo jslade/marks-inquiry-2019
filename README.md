@@ -18,7 +18,7 @@ Install some dependencies
 ```bash
 python3 -m pip install -U pygame --user
 python3 -m pip install -U pubnub --user
-python3 -m pip install -U mamba expects --user
+python3 -m pip install -U mamba expects doublex doublex-expects --user
 ```
 
 ## How to Run It
