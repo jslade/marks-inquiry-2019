@@ -1,7 +1,7 @@
 from .engine.game_object import GameObject
 
 class Snake(GameObject):
-    segment_distance = 10
+    segment_size = 20
 
     growth_event_id = GameObject.define_event()
     death_event_id = GameObject.define_event()
@@ -17,7 +17,7 @@ class Snake(GameObject):
         self.length = 0
 
         for i in range(length):
-            self.add_point(i*self.segment_distance, 0)
+            self.add_point(i*self.segment_size, 0)
 
         self.dead = False
         self.growing = 0
@@ -56,11 +56,11 @@ class Snake(GameObject):
 
         # If the head has moved at least the distance of a new segment,
         # then add a segment
-        if len >= self.segment_distance:
+        if len >= self.segment_size:
             # The vec_to_head is a vector that is pointed in the direction
             # of movement (the velocity vector), but the segment length long
             vec_to_head = self.Vector2(self.velocity)
-            vec_to_head.scale_to_length(self.segment_distance)
+            vec_to_head.scale_to_length(self.segment_size)
 
             # So now we'll add a new point that distance away from the last point
             # and remove the tail piece (unless it's growing)
@@ -103,10 +103,18 @@ class Snake(GameObject):
 
         self.Point.recycle(pt)
 
+    def segments(self):
+        pt = self.tail_pt
+        while pt is not None:
+            yield pt
+            pt = pt.next
 
-    def render(self, surface):
-        pass
-
+    def move_to(self, x, y):
+        dx = x - self.head_pt.x
+        dy = y - self.head_pt.y
+        for pt in self.segments():
+            pt.x += dx
+            pt.y += dy
 
 
     # Segments of the snake body are represented by the Point class

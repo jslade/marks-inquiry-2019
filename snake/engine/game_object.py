@@ -48,6 +48,7 @@ class GameObject(object):
     time = _pygame.time
 
     Rect = _pygame.Rect
+    Surface = _pygame.Surface
     Vector2 = _pygame.math.Vector2
 
 
