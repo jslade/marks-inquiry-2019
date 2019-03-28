@@ -81,13 +81,55 @@ class GameObject(object):
         for sub in subs:
             sub(event)
 
-    def post(self, event_id, dict=None, **attrs):
-        if dict:
-            event = self.pygame.event.Event(event_id, dict)
-        else:
-            event = self.pygame.event.Event(event_id, **attrs)
-
+    def post(self, event_id, data=None, **attrs):
+        if data is None: data = attrs
+        event = self.pygame.event.Event(event_id, data)
         self.pygame.event.post(event)
+
+    def do_after(self, millis, callback, data=None, **attrs):
+        if data is None: data = attrs
+
+        target = self.pygame.time.get_ticks() + millis
+        timer = {
+            'target': target,
+            'action': callback,
+            'data': data
+        }
+
+        # timer queue is expected to be short, and most insertions likely to happen
+        # at the front of the list, so just do linear search...
+        queued = False
+        for i in range(len(GameObject.timer_queue)):
+            existing = GameObject.timer_queue[i]
+            if target < existing['target']:
+                GameObject.timer_queue[i,i] = [timer]
+                queued = True
+                break
+
+        if not queued:
+            GameObject.timer_queue.append(timer)
+
+
+    def do_every(self, millis, callback, data=None, **attrs):
+        if data is None: data = attrs
+        self.do_after(millis, self.on_every, { 'action': callback, 'data': data, 'interval': millis})
+
+    def on_every(self, data):
+        data['action'](data['data'])
+        self.do_after(data['interval'], self.on_every, data)
+
+
+    timer_queue = []
+    @classmethod
+    def process_timers(klass):
+        now = _pygame.time.get_ticks()
+        while len(klass.timer_queue) > 0:
+            next_timer = klass.timer_queue[0]
+            if now <= next_timer['target']:
+                break
+
+            next_timer['action'](next_timer['data'])
+            klass.timer_queue.pop(0)
 
 
     # Logging to the console for debugging:

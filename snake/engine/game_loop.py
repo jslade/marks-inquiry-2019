@@ -46,6 +46,7 @@ class GameLoop(GameObject):
 
             millis = self.clock.get_time()
 
+            GameObject.process_timers()
             self.process_events()
             if self.scene:
                 self.scene.tick(millis)
