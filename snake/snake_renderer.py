@@ -16,6 +16,8 @@ class SnakeRenderer(GameObject):
 
     def prerender_segments(self):
         width = Settings.snake_size * 2
+        self.offset = int(width / 2)
+
         self.segment = self.Surface(
             (width, width),
             flags=self.pygame.SRCALPHA
@@ -36,8 +38,6 @@ class SnakeRenderer(GameObject):
             2
         )
 
-        self.offset = int(width / 2)
-
 
     def render(self, surface):
         for segment in self.snake.segments():
@@ -50,3 +50,24 @@ class SnakeRenderer(GameObject):
         #self.draw.rect(surface, (255,0,0), self.snake.rect, 2)
 
 
+class SquareSnakeRenderer(SnakeRenderer):
+    def prerender_segments(self):
+        width = Settings.snake_size
+        self.offset = int(width / 2)
+
+        self.segment = self.Surface(
+            (width, width)
+        )
+
+        self.draw.rect(
+            self.segment,
+            self.color,
+            self.Rect(0, 0, width, width)
+        )
+
+        self.draw.rect(
+            self.segment,
+            self.border_color,
+            self.Rect(0, 0, width, width),
+            2
+        )

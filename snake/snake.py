@@ -2,14 +2,14 @@ from .engine.bounded_object import BoundedObject
 from .engine.game_object import GameObject
 
 from .settings import Settings
-from .snake_renderer import SnakeRenderer
+from .snake_renderer import SnakeRenderer, SquareSnakeRenderer
 
 
 class Snake(BoundedObject):
     growth_event_id = GameObject.define_event()
     death_event_id = GameObject.define_event()
 
-    def __init__(self, color=None, length=3):
+    def __init__(self, color=None, length=3, square=False):
         BoundedObject.__init__(self)
 
         self.velocity = self.Vector2(0, 0)
@@ -24,7 +24,10 @@ class Snake(BoundedObject):
         self.snake_size_squared = Settings.snake_size * Settings.snake_size
 
         if color:
-            self.renderer = SnakeRenderer(self, color)
+            if square:
+                self.renderer = SquareSnakeRenderer(self, color)
+            else:
+                self.renderer = SnakeRenderer(self, color)
 
         self.set_length(length)
 
@@ -53,6 +56,10 @@ class Snake(BoundedObject):
     def set_velocity(self, speed, angle):
         self.velocity.from_polar( (speed, angle) )
         self.head_vector.x = self.head_vector.y = 0
+
+    def get_heading(self):
+        mag, dir = self.velocity.as_polar()
+        return dir
 
     def turn(self, degrees):
         self.velocity.rotate_ip(degrees)
