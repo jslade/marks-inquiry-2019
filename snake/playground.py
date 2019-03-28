@@ -34,6 +34,8 @@ class Playground(GameScene):
             collider = SnakeCollider(snake, food, on_touch=self.touched_food)
             self.add_offscreen_object(collider)
 
+        self.do_every(1000, self.check_snakes_out_of_bounds, snakes=snakes)
+
         for snake in snakes:
             collider = SnakeCollider(snake, on_touch=self.touched_snake)
             for other_snake in snakes:
@@ -56,4 +58,17 @@ class Playground(GameScene):
             self.random_int(200, Settings.screen_height - 200)
         )
         snake.set_length(10)
+
+
+    def check_snakes_out_of_bounds(self, data):
+        self.log("checking bounds")
+        for snake in data['snakes']:
+            if self.snake_out_of_bounds(snake):
+                self.reset_snake(snake)
+
+    def snake_out_of_bounds(self, snake):
+        return (snake.rect.left > Settings.screen_width) or \
+               (snake.rect.right < 0) or \
+               (snake.rect.top > Settings.screen_height) or \
+               (snake.rect.bottom < 0)
 
