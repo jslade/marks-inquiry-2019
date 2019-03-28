@@ -5,15 +5,17 @@ from .settings import Settings
 
 
 class SnakeCollider(GameObject):
-    def __init__(self, snake, obj, on_touch=None):
+    def __init__(self, snake, obj=None, on_touch=None):
         GameObject.__init__(self)
         self.snake = snake
-        self.objects = [obj]
+        self.objects = []
         self.v = self.Vector2()
 
         self.on_touch = on_touch
 
         self.segment_size_squared = Settings.snake_size * Settings.snake_size
+
+        if obj is not None: self.add_object(obj)
 
 
     def add_object(self, obj):

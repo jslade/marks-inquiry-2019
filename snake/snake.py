@@ -18,10 +18,6 @@ class Snake(BoundedObject):
         self.head_pt = None
         self.tail_pt = None
         self.length = 0
-
-        for i in range(length):
-            self.add_point(i*Settings.snake_size, 0)
-
         self.dead = False
         self.growing = 0
 
@@ -29,6 +25,15 @@ class Snake(BoundedObject):
 
         if color:
             self.renderer = SnakeRenderer(self, color)
+
+        self.set_length(length)
+
+
+    def set_length(self, length):
+        while self.length < length:
+            self.add_point(self.length*Settings.snake_size, 0)
+        while self.length > length:
+            self.remove_point_at_tail()
 
 
     def tick(self, millis):

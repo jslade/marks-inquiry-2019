@@ -15,25 +15,45 @@ class Playground(GameScene):
         snake_layer.set_background((0,0,0))
         self.add_layer(snake_layer)
 
-        self.food = Food()
-        self.food.rect.center = (int(Settings.screen_width/2), int(Settings.screen_height/2))
-        snake_layer.add_object(self.food)
+        snakes = []
+        for i in range(5):
+            food = Food()
+            food.rect.centerx = self.random_int(100, Settings.screen_width - 100)
+            food.rect.centery = self.random_int(100, Settings.screen_height - 100)
+            snake_layer.add_object(food)
 
-        self.snake = Snake(color=Settings.snake_colors[0], length=10)
-        snake_layer.add_object(self.snake)
-        self.snake.move_to(int(Settings.screen_width/2) + 100, int(Settings.screen_height/2) + 100)
-        self.snake.set_velocity(Settings.snake_speed, 0)
+            snake = Snake(color=Settings.snake_colors[i], length=10)
+            snake_layer.add_object(snake)
+            snake.set_velocity(Settings.snake_speed, 0)
+            snakes.append(snake)
+            self.reset_snake(snake)
 
-        self.follow = SnakeFollowObject(self.snake, self.food)
-        self.add_offscreen_object(self.follow)
+            follow = SnakeFollowObject(snake, food)
+            self.add_offscreen_object(follow)
 
-        self.collider = SnakeCollider(self.snake, self.food)
-        self.collider.on_touch = self.touched_food
-        self.add_offscreen_object(self.collider)
+            collider = SnakeCollider(snake, food, on_touch=self.touched_food)
+            self.add_offscreen_object(collider)
+
+        for snake in snakes:
+            collider = SnakeCollider(snake, on_touch=self.touched_snake)
+            for other_snake in snakes:
+                if other_snake != snake: collider.add_object(other_snake)
+            #self.add_offscreen_object(collider)
 
 
     def touched_food(self, snake, food):
-        self.food.rect.centerx = self.random_int(100, Settings.screen_width - 100)
-        self.food.rect.centery = self.random_int(100, Settings.screen_height - 100)
+        food.rect.centerx = self.random_int(100, Settings.screen_width - 100)
+        food.rect.centery = self.random_int(100, Settings.screen_height - 100)
         snake.queue_growth(10)
+
+    def touched_snake(self, snake, other_snake):
+        self.reset_snake(snake)
+
+
+    def reset_snake(self, snake):
+        snake.move_to(
+            self.random_int(200, Settings.screen_width - 200),
+            self.random_int(200, Settings.screen_height - 200)
+        )
+        snake.set_length(10)
 
