@@ -5,7 +5,7 @@ from .settings import Settings
 from .snake import Snake
 
 
-class Apple(BoundedObject):
+class Food(BoundedObject):
     def __init__(self, ):
         BoundedObject.__init__(self)
 
