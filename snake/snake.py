@@ -1,14 +1,16 @@
+from .engine.bounded_object import BoundedObject
 from .engine.game_object import GameObject
 
 from .settings import Settings
+from .snake_renderer import SnakeRenderer
 
 
-class Snake(GameObject):
+class Snake(BoundedObject):
     growth_event_id = GameObject.define_event()
     death_event_id = GameObject.define_event()
 
-    def __init__(self, length=3):
-        GameObject.__init__(self)
+    def __init__(self, color=None, length=3):
+        BoundedObject.__init__(self)
 
         self.velocity = self.Vector2(0, 0)
         self.head_vector = self.Vector2()
@@ -23,9 +25,18 @@ class Snake(GameObject):
         self.dead = False
         self.growing = 0
 
+        self.snake_size_squared = Settings.snake_size * Settings.snake_size
+
+        if color:
+            self.renderer = SnakeRenderer(self, color)
+
+
     def tick(self, millis):
-        self.slither(millis)
-        #self.check_collisions()
+        if not self.dead:
+            self.slither(millis)
+
+    def render(self, surface):
+        self.renderer.render(surface)
 
     def die(self):
         self.dead = True
@@ -51,14 +62,15 @@ class Snake(GameObject):
         # Once the head vector is long enough, then move the body points
         self.head_vector += self.velocity * millis
         self.extend_head()
+        self.update_bounds()
 
     def extend_head(self):
         # How far has the head moved from the last point?
-        len = self.head_vector.length()
+        len2 = self.head_vector.length_squared()
 
         # If the head has moved at least the distance of a new segment,
         # then add a segment
-        if len >= Settings.snake_size:
+        if len2 >= self.snake_size_squared:
             # The vec_to_head is a vector that is pointed in the direction
             # of movement (the velocity vector), but the segment length long
             vec_to_head = self.Vector2(self.velocity)
@@ -117,6 +129,30 @@ class Snake(GameObject):
         for pt in self.segments():
             pt.x += dx
             pt.y += dy
+
+        self.update_bounds
+
+    def update_bounds(self):
+        x1 = x2 = self.tail_pt.x
+        y1 = y2 = self.tail_pt.y
+        for pt in self.segments():
+            x = pt.x
+            y = pt.y
+
+            if x < x1: x1 = x
+            if x > x2: x2 = x
+            if y < y1: y1 = y
+            if y > y2: y2 = y
+
+        x1 = x1 - Settings.snake_size
+        y1 = y1 - Settings.snake_size
+        x2 = x2 + Settings.snake_size
+        y2 = y2 + Settings.snake_size
+
+        self.rect.left = x1
+        self.rect.top = y1
+        self.rect.width = x2 - x1
+        self.rect.height = y2 - y1
 
 
     # Segments of the snake body are represented by the Point class

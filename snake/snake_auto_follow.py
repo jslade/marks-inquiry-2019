@@ -4,19 +4,31 @@ from .settings import Settings
 
 
 class SnakeAutoFollow(GameObject):
-    def __init__(self, snake, target):
+    def __init__(self, snake, target_location):
         GameObject.__init__(self)
         self.snake = snake
-        self.target = target
+        self.target_location = target_location
         self.turning_to = 0
 
+        self.ticks = 0
+
     def tick(self, millis):
+        self.ticks += millis
+        if True or self.ticks >= 250:
+            self.ticks -= 200
+            self.update_target_angle()
+
+        self.turn(millis)
+
+    def update_target_angle(self):
         vector_to_mouse = self.Vector2(
-            self.target[0] - self.snake.head_pt.x,
-            self.target[1] - self.snake.head_pt.y
+            self.target_location[0] - self.snake.head_pt.x,
+            self.target_location[1] - self.snake.head_pt.y
         )
         dist, self.turning_to = vector_to_mouse.as_polar()
+        #self.log("target turning_to = %.1f" % (self.turning_to))
 
+    def turn(self, millis):
         dist, angle = self.snake.velocity.as_polar()
         turn_angle = self.turning_to - angle
 
@@ -35,7 +47,7 @@ class SnakeFollowMouse(SnakeAutoFollow):
         self.on_event(self.pygame.MOUSEMOTION, self.process_mouse_motion)
 
     def process_mouse_motion(self, event):
-        self.target = event.pos
+        self.target_location = event.pos
 
 
 class SnakeFollowObject(SnakeAutoFollow):
@@ -44,6 +56,6 @@ class SnakeFollowObject(SnakeAutoFollow):
         self.obj = obj
 
     def tick(self, millis):
-        self.target = self.obj.rect.center
+        self.target_location = self.obj.rect.center
         SnakeAutoFollow.tick(self, millis)
 

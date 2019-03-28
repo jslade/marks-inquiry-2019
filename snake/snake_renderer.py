@@ -1,22 +1,17 @@
-from .settings import Settings
-from .snake import Snake
-
-from .engine.bounded_object import BoundedObject
+from .engine.game_object import GameObject
 from .engine.colors import Colors
 
+from .settings import Settings
 
-class SnakeRenderer(BoundedObject):
+
+class SnakeRenderer(GameObject):
     def __init__(self, snake, color):
-        BoundedObject.__init__(self)
+        GameObject.__init__(self)
         self.snake = snake
         self.color = color
         self.border_color = Colors.lighter(color, 0.20)
 
         self.prerender_segments()
-
-
-    def tick(self, millis):
-        self.snake.tick(millis)
 
 
     def prerender_segments(self):
@@ -51,3 +46,7 @@ class SnakeRenderer(BoundedObject):
                 (segment.x - self.offset,
                  segment.y - self.offset)
             )
+
+        #self.draw.rect(surface, (255,0,0), self.snake.rect, 2)
+
+
