@@ -1,7 +1,12 @@
 from .button import Button
 from .engine.bounded_object import BoundedObject
+from .engine.game_object import GameObject
 from .engine.game_scene import GameScene
 from .engine.layer import Layer
+from .play_scene import PlayScene
+from .help_scene import HelpScene
+
+
 
 class StartScene(GameScene):
     def on_activated(self, screen):
@@ -22,9 +27,16 @@ class StartScene(GameScene):
 
     def play_button_clicked(self, event):
         self.log("You want to play?")
+        game_loop = GameObject.find_by_name('GameLoop')
+        game_loop.set_scene(PlayScene())
+
+
 
     def help_button_clicked(self, event):
         self.log("No help for you!")
+        game_loop = GameObject.find_by_name('GameLoop')
+        game_loop.set_scene(HelpScene())
+
 
     def exit_button_clicked(self, event):
         self.log("Why you leave me?")
