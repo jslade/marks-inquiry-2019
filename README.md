@@ -35,3 +35,19 @@ python3 $(path_to_mamba) --format=documentation <spec paths>
 ```
 
 On my linux system, `path_to_mamba` = `~/.local/bin/mamba` -- it will depend on how you have installed mamba
+
+
+## The web app for multiplayer
+
+The multiplayer mode uses [PubNub](https://pubnub.com/) to provide a "second-screen" controller experience:
+* Run the game in multiplayer mode, which will connect the game to PubNub to receive remote player input
+* Visit https://marks-inquiry-2019.herokuapp.com/ to load the multiplayer launcher.
+* The launcher will display a QR code that players can scan on their phones to automatically join the game
+* When players scan the QR code, they will be presented with a simple remote control interface on their device, which sends input to the game via PubNub.
+
+### How to deploy to heroko
+
+```bash
+heroku login
+git subtree push --prefix web heroku master
+```
