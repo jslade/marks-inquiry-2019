@@ -35,6 +35,10 @@ var resetKnob = function() {
 };
 
 var makeKnobDraggable = function() {
+  document.ontouchstart = function (e) {
+    e.preventDefault();
+  }
+
   knob.el = $('#knob');
   knob.center_x = parseFloat(knob.el.attr("cx"));
   knob.center_y = parseFloat(knob.el.attr("cy"));
@@ -53,6 +57,11 @@ var makeKnobDraggable = function() {
     resetKnob();
   });
 
+  knob.el.mouseleave(function (evt) {
+    knob.touch_down = false;
+    resetKnob();
+  });
+
   knob.el.mousemove(function (evt) {
     var loc = relative_location(rim.el, evt);
     dragKnob(loc);
@@ -66,8 +75,12 @@ var makeKnobDraggable = function() {
     knob.touch_down = false;
   });
 
+  knob.el.on("touchcancel", function (evt) {
+    knob.touch_down = false;
+  });
+
   knob.el.on("touchmove", function (evt) {
-    var loc = relative_location(rim.el, evt);
+    var loc = relative_location(rim.el, evt.touches[0]);
     dragKnob(loc);
   });
 };
