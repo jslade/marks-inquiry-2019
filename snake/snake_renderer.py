@@ -11,8 +11,11 @@ class SnakeRenderer(GameObject):
         self.color = color
         self.border_color = Colors.lighter(color, 0.20)
 
-        self.prerender_segments()
+        self.prerender()
 
+    def prerender(self):
+        self.prerender_segments()
+        self.prerender_eyes()
 
     def prerender_segments(self):
         width = Settings.snake_size * 2
@@ -39,7 +42,37 @@ class SnakeRenderer(GameObject):
         )
 
 
+    def prerender_eyes(self):
+        width = int(Settings.snake_size)
+        self.eye = self.Surface(
+            (width, width),
+            flags=self.pygame.SRCALPHA
+        )
+
+        self.draw.circle(
+            self.eye,
+            (255,255,255),
+            (int(width / 2), int(width / 2)),
+            int(width / 2)
+        )
+        self.draw.circle(
+            self.eye,
+            (0,0,0),
+            (int(width / 2), int(width / 2)),
+            int(width / 4)
+        )
+
+        self.eye_vector = self.Vector2()
+
+
     def render(self, surface):
+        self.render_segments(surface)
+        self.render_eyes(surface)
+
+        #self.draw.rect(surface, (255,0,0), self.snake.rect, 2)
+
+
+    def render_segments(self, surface):
         for segment in self.snake.segments():
             surface.blit(
                 self.segment,
@@ -47,7 +80,20 @@ class SnakeRenderer(GameObject):
                  segment.y - self.offset)
             )
 
-        #self.draw.rect(surface, (255,0,0), self.snake.rect, 2)
+
+    def render_eyes(self, surface):
+        self.eye_vector.from_polar((Settings.snake_size/3, self.snake.get_heading()))
+        self.eye_vector.rotate_ip(90)
+        surface.blit(
+            self.eye,
+            (self.snake.head_pt.x - self.offset + int(self.eye_vector.x),
+             self.snake.head_pt.y - self.offset + int(self.eye_vector.y))
+        )
+        surface.blit(
+            self.eye,
+            (self.snake.head_pt.x - self.offset - int(self.eye_vector.x),
+             self.snake.head_pt.y - self.offset - int(self.eye_vector.y))
+        )
 
 
 class SquareSnakeRenderer(SnakeRenderer):
@@ -71,3 +117,6 @@ class SquareSnakeRenderer(SnakeRenderer):
             self.Rect(0, 0, width, width),
             2
         )
+
+    def render_eyes(self, surface):
+        pass
