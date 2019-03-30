@@ -102,7 +102,7 @@ class GameObject(object):
         for i in range(len(GameObject.timer_queue)):
             existing = GameObject.timer_queue[i]
             if target < existing['target']:
-                GameObject.timer_queue[i,i] = [timer]
+                GameObject.timer_queue[i:i] = [timer]
                 queued = True
                 break
 
