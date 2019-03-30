@@ -4,7 +4,7 @@ from .settings import Settings
 
 
 class SnakeAutoFollow(GameObject):
-    def __init__(self, snake, target_location):
+    def __init__(self, snake, target_location=None):
         GameObject.__init__(self)
         self.snake = snake
         self.target_location = target_location
@@ -39,7 +39,9 @@ class SnakeAutoFollow(GameObject):
             max_turn *= -1.0
             if turn_angle < max_turn: turn_angle = max_turn
 
+        #self.log("turning_to %.1f by %.1f" % (self.turning_to, turn_angle))
         self.snake.turn(turn_angle)
+
 
 class SnakeFollowMouse(SnakeAutoFollow):
     def __init__(self, snake):
@@ -58,4 +60,18 @@ class SnakeFollowObject(SnakeAutoFollow):
     def tick(self, millis):
         self.target_location = self.obj.rect.center
         SnakeAutoFollow.tick(self, millis)
+
+
+class SnakeFollowController(SnakeAutoFollow):
+    def __init__(self, snake):
+        SnakeAutoFollow.__init__(self, snake)
+        self.controller_angle = 0
+
+    def set_controller_angle(self, angle):
+        #self.log("set_controller_angle %.1f" % (angle))
+        self.turning_to = angle
+
+    def tick(self, millis):
+        self.turn(millis)
+
 

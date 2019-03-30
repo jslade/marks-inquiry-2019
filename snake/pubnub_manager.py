@@ -21,6 +21,17 @@ class PubNubManager(GameObject, SubscribeCallback):
             'launcher'
         ).execute()
 
+        self.subscriptions = {}
+
+
+    def publish(self, channel, message):
+        self.pubnub.publish().channel(channel).message(message).sync()
+
+
+    def subscribe(self, channel, callback):
+        self.subscriptions[channel] = callback
+        self.pubnub.subscribe().channels(channel).execute()
+
 
     def shutdown(self):
         self.pubnub.publish().channel('lauuncher').message({'msg': "bye"}).sync()
@@ -51,4 +62,10 @@ class PubNubManager(GameObject, SubscribeCallback):
 
     # SubscribeCallback.message:
     def message(self, pubnub, message):
-        self.log("PubNub: incoming = %s" % (message.message))
+        #self.log("PubNub: incoming = %s" % (message.message))
+
+        channel = message.channel
+        callback = self.subscriptions.get(channel)
+        if callback is not None:
+            callback(message.message)
+

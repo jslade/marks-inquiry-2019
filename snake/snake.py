@@ -24,6 +24,7 @@ class Snake(BoundedObject):
         self.snake_size_squared = Settings.snake_size * Settings.snake_size
 
         if color:
+            self.color = color
             if square:
                 self.renderer = SquareSnakeRenderer(self, color)
             else:

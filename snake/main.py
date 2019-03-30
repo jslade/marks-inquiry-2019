@@ -13,17 +13,11 @@ from .settings import Settings
 from .start_scene import StartScene
 
 
-
-#from .pubnub_manager import PubNubManager
-
-
 class SnakeGame(GameObject):
     def main(self, args):
         self.parse_args(args)
         loop = self.init_game()
         loop.run()
-
-        #self.pubnub.shutdown()
 
 
     def parse_args(self, args):
@@ -31,8 +25,6 @@ class SnakeGame(GameObject):
 
 
     def init_game(self):
-        #self.pubnub = PubNubManager()
-
         screen = GameScreen(Settings.screen_width, Settings.screen_height)
         loop = GameLoop(screen, Settings.target_fps)
 
