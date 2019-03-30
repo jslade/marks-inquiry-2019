@@ -15,6 +15,7 @@ from .player import Player
 class Playground(GameScene):
     def on_activated(self, screen):
         self.pubnub = PubNubManager()
+        self.add_offscreen_object(self.pubnub)
         self.pubnub.subscribe('launcher', self.on_launcher_message)
         self.player = None
 
