@@ -32,6 +32,11 @@ class SnakeAutoFollow(GameObject):
         dist, angle = self.snake.velocity.as_polar()
         turn_angle = self.turning_to - angle
 
+        if turn_angle > 180:
+            turn_angle -= 360
+        elif turn_angle < -180:
+            turn_angle += 360
+
         max_turn = Settings.snake_turn_rate * millis
         if turn_angle > 0:
             if turn_angle > max_turn: turn_angle = max_turn
