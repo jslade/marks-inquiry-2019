@@ -36,11 +36,15 @@ class MultiplayerScene(GameScene):
 
         self.create_snakes()
         self.create_obstacles()
+        self.create_score_text()
 
         self.create_waiting_message()
         self.do_every(1000, self.check_waiting_players)
         self.do_every(1000, self.snake_auto_follow)
         self.do_every(5000, self.update_food)
+
+        self.on_event(Snake.growth_event_id, self.on_growth)
+
 
     def create_snakes(self):
         self.snake_layer = Layer()
@@ -95,6 +99,39 @@ class MultiplayerScene(GameScene):
             for obstacle in self.obstacles:
                 collider.add_object(obstacle)
             self.obstacle_colliders.append(collider)
+
+    def create_score_text(self):
+        self.score_text = []
+        for snake in self.snakes:
+            text = Button(text='XXXXX  --  XXXXX', text_color=snake.color, size=20, rect=self.Rect(10,10,200,24))
+            self.score_text.append(text)
+
+    def on_growth(self, event):
+        snake = event.snake
+        self.update_snake_score(snake)
+
+    def update_snake_score(self, snake):
+        text = self.score_text[snake.index]
+        player = self.players[snake.index]
+        if text and player:
+            text.set_text("%.5s -- %-.5s" % (player.id, snake.length))
+
+        self.update_score_text_bounds()
+
+    def update_score_text_bounds(self):
+        active_snakes = []
+        for snake in self.snakes:
+            player = self.players[snake.index]
+            if player:
+                active_snakes.append(snake)
+
+        active_snakes.sort(reverse=True, key=lambda snake: snake.length)
+        sorted_scores = [self.score_text[snake.index] for snake in active_snakes]
+
+        i = 0
+        for score_text in sorted_scores:
+            score_text.rect.top = 10 + score_text.rect.height * i
+            i += 1
 
 
     def create_waiting_message(self):
@@ -202,6 +239,8 @@ class MultiplayerScene(GameScene):
         self.remove_snake_player(snake)
         self.deactivate_snake(snake)
         self.check_waiting_players()
+        self.update_score_text_bounds()
+
 
     def activate_snake(self, snake):
         snake.dead = False
@@ -215,6 +254,10 @@ class MultiplayerScene(GameScene):
         self.add_offscreen_object(self.snake_colliders[snake.index])
         self.add_offscreen_object(self.obstacle_colliders[snake.index])
 
+        score_text = self.score_text[snake.index]
+        self.update_snake_score(snake)
+        self.score_layer.add_object(score_text)
+
         self.add_enough_food()
 
         self.hide_waiting_message()
@@ -226,6 +269,11 @@ class MultiplayerScene(GameScene):
         self.remove_offscreen_object(self.obstacle_colliders[snake.index])
         self.convert_dead_snake_to_food(snake)
         self.auto_follows[snake.index].set_active(False)
+
+        score_text = self.score_text[snake.index]
+        self.score_layer.remove_object(score_text)
+        self.update_score_text_bounds()
+
 
     def convert_dead_snake_to_food(self, snake):
         n = 0
@@ -272,11 +320,6 @@ class MultiplayerScene(GameScene):
 
 
     def add_player(self, player):
-        if player.snake is not None:
-            self.log("Huh? player %s already connected to snake %d" % (player.id, player.snake.index))
-            player.reset_snake()
-            return
-
         if self.active_player_count() < len(self.players):
             self.add_active_player(player)
         else:
@@ -289,6 +332,11 @@ class MultiplayerScene(GameScene):
         return len(active)
 
     def add_active_player(self, player):
+        if player.snake is not None:
+            self.log("Huh? player %s already connected to snake %d" % (player.id, player.snake.index))
+            player.reset_snake()
+            return True
+
         # Find the first open slot
         for i in range(len(self.snakes)):
             if self.players[i] is None:
@@ -303,6 +351,9 @@ class MultiplayerScene(GameScene):
         return False
 
     def add_waiting_player(self, player, cooldown=None):
+        if player in self.waiting_players:
+            return
+
         self.waiting_players.append(player)
         player.set_waiting(cooldown)
         self.log("Added waiting player %s with cooldown %s" % (player.id, cooldown))
