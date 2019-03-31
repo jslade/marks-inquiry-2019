@@ -44,5 +44,5 @@ class Food(BoundedObject):
 
     def render(self, surface):
         surface.blit(self.surface, self.rect.topleft)
-        self.draw.rect(surface, (0,255,0), self.rect, 2)
+        #self.draw.rect(surface, (0,255,0), self.rect, 2)
 
