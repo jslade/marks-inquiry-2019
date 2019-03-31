@@ -1,7 +1,7 @@
 
 class Settings(object):
-    screen_width = 800
-    screen_height = 600
+    screen_width = 1200
+    screen_height = 900
     target_fps = 60
 
     snake_size = 10
@@ -15,3 +15,8 @@ class Settings(object):
       (200, 200, 100), # yellow
       (200, 0, 200) # fuscia
     ]
+
+    max_players = 5
+    food_per_player = 3
+
+    obstacle_color = (20,20,20)

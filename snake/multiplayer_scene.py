@@ -1,0 +1,265 @@
+from .engine.game_object import GameObject
+from .engine.game_scene import GameScene
+from .engine.layer import Layer
+
+from .button import Button
+from .food import Food
+from .obstacle import Obstacle
+from .player import Player
+from .pubnub_manager import PubNubManager
+from .settings import Settings
+from .snake import Snake
+from .snake_collider import SnakeCollider
+
+
+class MultiplayerScene(GameScene):
+    def on_deactivated(self):
+        self.pubnub.shutdown()
+
+    def on_activated(self, screen):
+        self.pubnub = PubNubManager()
+        self.add_offscreen_object(self.pubnub)
+        self.pubnub.subscribe('launcher', self.on_launcher_message)
+
+        self.player_map = {}
+        self.players = [None] * Settings.max_players
+        self.waiting_players = []
+
+        self.food = []
+        self.food_layer = Layer()
+        self.food_layer.set_background((0,0,0))
+        self.add_layer(self.food_layer)
+
+        self.score_layer = Layer()
+        self.add_layer(self.score_layer)
+
+        self.create_snakes()
+        self.create_obstacles()
+
+        self.create_waiting_message()
+        self.do_every(1000, self.check_waiting_players)
+
+    def create_snakes(self):
+        self.snake_layer = Layer()
+        self.add_layer(self.snake_layer)
+
+        self.snakes = []
+        self.food_colliders = []
+        self.snake_positions = []
+        self.snake_colliders = []
+
+        for i in range(Settings.max_players):
+            snake = Snake(color=Settings.snake_colors[i])
+            snake.index = i
+            self.snakes.append(snake)
+
+            self.snake_positions.append((100, 200 + i*100))
+
+            collider = SnakeCollider(snake, on_touch=self.touched_food)
+            self.food_colliders.append(collider)
+
+        for snake in self.snakes:
+            collider = SnakeCollider(snake, on_touch=self.touched_snake)
+            for other_snake in self.snakes:
+                if other_snake != snake: collider.add_object(other_snake)
+            self.snake_colliders.append(collider)
+
+    def create_obstacles(self):
+        self.obstacles = []
+
+        sw = Settings.screen_width
+        sh = Settings.screen_height
+        thick = 2
+
+        self.obstacles.append(Obstacle(color=Settings.obstacle_color, rect=self.Rect(0,0,sw,thick)))
+        self.obstacles.append(Obstacle(color=Settings.obstacle_color, rect=self.Rect(0,sh-thick,sw,thick)))
+        self.obstacles.append(Obstacle(color=Settings.obstacle_color, rect=self.Rect(0,0,thick,sh)))
+        self.obstacles.append(Obstacle(color=Settings.obstacle_color, rect=self.Rect(sw-thick,0,thick,sh)))
+
+        self.obstacle_layer = Layer()
+        self.add_layer(self.obstacle_layer)
+        for obstacle in self.obstacles:
+            self.obstacle_layer.add_object(obstacle)
+
+        self.obstacle_colliders = []
+        for snake in self.snakes:
+            collider = SnakeCollider(snake, on_touch=self.touched_obstacle)
+            for obstacle in self.obstacles:
+                collider.add_object(obstacle)
+            self.obstacle_colliders.append(collider)
+
+
+    def create_waiting_message(self):
+        self.waiting_text = Button( # todo: should be textbox
+            text='Waiting for players',
+            color=(40,40,60),
+            hover_color=(40,40,80),
+            text_color=(255,255,255),
+            rect=self.Rect(
+                int(Settings.screen_width/2 - Settings.screen_width/6),
+                int(Settings.screen_height/2 - Settings.screen_height/6),
+                int(Settings.screen_height/3),
+                int(Settings.screen_height/3)
+            )
+        )
+        self.show_waiting_message()
+
+    def show_waiting_message(self):
+        self.log("Now waiting...")
+        self.score_layer.add_object(self.waiting_text)
+
+    def hide_waiting_message(self):
+        self.log("Yay! We can play!")
+        self.score_layer.remove_object(self.waiting_text)
+
+
+    def add_food(self, _=None, where=None):
+        food = Food()
+        self.food.append(food)
+        self.food_layer.add_object(food)
+        if where is None:
+            self.place_food(food)
+        else:
+            food.rect.center = where
+        for collider in self.food_colliders:
+            collider.add_object(food)
+
+    def remove_food(self, food):
+        self.food_layer.remove_object(food)
+        for collider in self.food_colliders:
+            collider.remove_object(food)
+
+    def place_food(self, food):
+        food.rect.centerx = self.random_int(100, Settings.screen_width - 100)
+        food.rect.centery = self.random_int(100, Settings.screen_height - 100)
+
+    def max_food(self):
+        return self.active_player_count() * Settings.food_per_player
+
+
+    def touched_food(self, snake, food):
+        snake.queue_growth(4)
+
+        if len(self.food) > self.max_food():
+            self.remove_food(food)
+        else:
+            self.place_food(food)
+
+
+    def touched_obstacle(self, snake, obstacle):
+        self.log("Snake %s %s touched an obstacle (%d) at %s" % (snake.rect, snake.head_rect, snake.index, obstacle.rect))
+        self.kill_snake(snake)
+
+    def touched_snake(self, snake, other_snake):
+        self.log("Snake touched another snake (%s --> %s)" % (snake.index, other_snake.index))
+        self.kill_snake(snake)
+
+    def kill_snake(self, snake):
+        snake.die()
+        self.remove_snake_player(snake)
+        self.deactivate_snake(snake)
+        self.check_waiting_players()
+
+    def activate_snake(self, snake):
+        snake.dead = False
+        snake.set_length(1)
+        snake.set_length(5)
+        snake.move_to(*self.snake_positions[snake.index])
+        snake.set_velocity(Settings.snake_speed, 0)
+
+        food_to_add = self.max_food() - len(self.food)
+        for i in range(food_to_add):
+            self.do_after(500 * i, self.add_food)
+
+        self.snake_layer.add_object(snake)
+        self.add_offscreen_object(self.food_colliders[snake.index])
+        self.add_offscreen_object(self.snake_colliders[snake.index])
+        self.add_offscreen_object(self.obstacle_colliders[snake.index])
+
+        self.hide_waiting_message()
+
+    def deactivate_snake(self, snake):
+        self.snake_layer.remove_object(snake)
+        self.remove_offscreen_object(self.food_colliders[snake.index])
+        self.remove_offscreen_object(self.snake_colliders[snake.index])
+        self.remove_offscreen_object(self.obstacle_colliders[snake.index])
+        self.convert_dead_snake_to_food(snake)
+
+
+    def convert_dead_snake_to_food(self, snake):
+        n = 0
+        for segment in snake.segments():
+            n += 1
+            if n % 4 == 0:
+                self.add_food(where=((segment.x, segment.y)))
+
+
+    def remove_snake_player(self, snake):
+        player = self.players[snake.index]
+        self.players[snake.index] = None
+        self.remove_offscreen_object(player)
+
+        if player.still_connected():
+            self.add_waiting_player(player, cooldown=10000)
+
+
+    def on_launcher_message(self, msg):
+        self.log('launcher: %s' % (msg))
+
+        if msg.get('player', None):
+            id = msg['player']
+            player = self.player_map.get(id, None)
+            if player is None:
+                player = self.player_map[id] = Player(id)
+            self.add_player(player)
+
+
+    def add_player(self, player):
+        if player.snake is not None:
+            self.log("Huh? player %s already connected to snake %d" % (player.id, player.snake.index))
+            return
+
+        if self.active_player_count() < len(self.players):
+            self.add_active_player(player)
+        else:
+            self.add_waiting_player(player)
+
+    def active_player_count(self):
+        active = []
+        for p in self.players:
+            if p is not None: active.append(p)
+        return len(active)
+
+    def add_active_player(self, player):
+        # Find the first open slot
+        for i in range(len(self.snakes)):
+            if self.players[i] is None:
+                self.log("Adding active player %s in slot %d" % (player.id, i))
+                self.players[i] = player
+                player.set_snake(self.snakes[i])
+                self.add_offscreen_object(player)
+                self.activate_snake(self.snakes[i])
+                return True
+
+        # No available slot
+        return False
+
+    def add_waiting_player(self, player, cooldown=None):
+        self.waiting_players.append(player)
+        player.set_waiting(cooldown)
+        self.log("Added waiting player %s with cooldown %s" % (player.id, cooldown))
+
+    def check_waiting_players(self, _=None):
+        if self.active_player_count() < Settings.max_players:
+            self.activate_waiting_player()
+        elif self.active_player_count() == 0 and len(self.waiting_players) == 0:
+            self.show_waiting_message()
+
+    def activate_waiting_player(self):
+        for i in range(len(self.waiting_players)):
+            player = self.waiting_players[i]
+            if player.is_in_cooldown():
+                continue
+            if self.add_active_player(player):
+                self.waiting_players.pop(i)
+                return

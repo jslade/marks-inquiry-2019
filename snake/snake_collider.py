@@ -22,7 +22,10 @@ class SnakeCollider(GameObject):
         self.objects.append(obj)
 
     def remove_object(self, obj):
-        self.objects.remove(obj)
+        try:
+            self.objects.remove(obj)
+        except ValueError:
+            pass
 
 
     def tick(self, millis):
@@ -33,10 +36,12 @@ class SnakeCollider(GameObject):
 
 
     def check_collision(self, obj):
-        if not obj.is_touching((self.snake.head_pt.x, self.snake.head_pt.y)):
+        if not obj.is_touching(self.snake.head_rect):
             return False
 
         if isinstance(obj, Snake):
+            if obj.dead:
+                return False
             return self.check_collision_with_snake(obj)
         else:
             return True

@@ -45,6 +45,22 @@ class Player(GameObject):
         self.snake.set_velocity(Settings.snake_speed, 0)
 
 
+    def set_waiting(self, cooldown):
+        self.cooldown = cooldown
+        if cooldown:
+            self.do_after(cooldown, self.reset_cooldown)
+
+        self.publish({
+            'action': 'waiting'
+        })
+
+    def reset_cooldown(self, _):
+        self.cooldown = None
+
+    def is_in_cooldown(self):
+        return self.cooldown is not None
+
+
     def tick(self, millis):
         if self.follow:
             self.follow.tick(millis)
@@ -69,7 +85,8 @@ class Player(GameObject):
         self.v.y = knob['y']
         mag, angle = self.v.as_polar()
         #self.log('knob angle=%s' % (angle))
-        self.follow.set_controller_angle(angle)
+        if self.follow:
+            self.follow.set_controller_angle(angle)
 
 
     def on_death(self, event):
@@ -97,3 +114,6 @@ class Player(GameObject):
             'length': self.snake.length
         })
 
+
+    def still_connected(self):
+        return True # todo....

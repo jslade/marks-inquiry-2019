@@ -14,6 +14,7 @@ class Snake(BoundedObject):
 
         self.velocity = self.Vector2(0, 0)
         self.head_vector = self.Vector2()
+        self.head_rect = self.Rect(0, 0, Settings.snake_size, Settings.snake_size)
 
         self.head_pt = None
         self.tail_pt = None
@@ -48,6 +49,7 @@ class Snake(BoundedObject):
         self.renderer.render(surface)
 
     def die(self):
+        self.log("Snake is dead!")
         self.dead = True
         self.post(self.death_event_id, snake=self)
 
@@ -166,6 +168,10 @@ class Snake(BoundedObject):
         self.rect.top = y1
         self.rect.width = x2 - x1
         self.rect.height = y2 - y1
+
+        self.head_rect.centerx = self.head_pt.x
+        self.head_rect.centery = self.head_pt.y
+
 
 
     # Segments of the snake body are represented by the Point class

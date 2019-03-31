@@ -29,7 +29,10 @@ class Layer(GameObject):
         obj.update_bounds()
 
     def remove_object(self, obj):
-        self.objects.remove(obj)
+        try:
+            self.objects.remove(obj)
+        except ValueError:
+            pass
 
 
     def tick(self, millis):
