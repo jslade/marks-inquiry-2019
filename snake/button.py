@@ -1,7 +1,7 @@
 from .engine.bounded_object import BoundedObject
 
 class Button(BoundedObject):
-    def __init__(self, color=None, hover_color=None, text_color=None, text='', action=None):
+    def __init__(self, color=None, hover_color=None, text_color=None, text='', action=None, rect=None):
         BoundedObject.__init__(self)
 
         self.color = color
@@ -12,6 +12,9 @@ class Button(BoundedObject):
 
         self.set_text(text)
         self.action = action
+
+        if rect is not None:
+            self.rect = rect
 
 
     def set_text(self, text):
