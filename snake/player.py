@@ -23,26 +23,43 @@ class Player(GameObject):
         self.on_event(Snake.death_event_id, self.on_death)
         self.growth_pending = False
 
+        self.last_moved_at = self.now()
         self.follow = None
         self.v = self.Vector2()
+
+        self.do_every(5000, self.notify_controller_of_snake)
 
 
     def set_snake(self, snake):
         self.snake = snake
-        self.color = self.snake.color
+        if self.snake is None:
+            return
 
-        self.publish({
-            'action': 'set_snake',
-            'color': {
-                'r': self.color[0],
-                'g': self.color[1],
-                'b': self.color[2]
-            },
-            'length': self.snake.length
-        })
+        self.color = self.snake.color
 
         self.follow = SnakeFollowController(self.snake)
         self.snake.set_velocity(Settings.snake_speed, 0)
+
+        self.notify_controller_of_snake()
+
+    def reset_snake(self):
+        self.notify_controller_of_snake()
+
+    def notify_controller_of_snake(self, _=None):
+        if self.snake:
+            self.publish({
+               'action': 'set_snake',
+                'color': {
+                    'r': self.color[0],
+                    'g': self.color[1],
+                    'b': self.color[2]
+                },
+                'length': self.snake.length
+            })
+        else:
+            self.publish({
+                'action': 'no_snake'
+            })
 
 
     def set_waiting(self, cooldown):
@@ -85,9 +102,16 @@ class Player(GameObject):
         self.v.y = knob['y']
         mag, angle = self.v.as_polar()
         #self.log('knob angle=%s' % (angle))
+        self.last_moved_at = self.now()
         if self.follow:
+            self.follow.set_active(True)
             self.follow.set_controller_angle(angle)
 
+    def time_since_last_moved(self):
+        return self.elapsed_since(self.last_moved_at)
+
+    def set_idle(self):
+        self.follow.set_active(False)
 
     def on_death(self, event):
         if event.snake != self.snake:
@@ -108,6 +132,8 @@ class Player(GameObject):
 
     def update_score(self, data):
         self.growth_pending = False
+        if not self.snake:
+            return
 
         self.publish({
             'action': 'growth',
@@ -116,4 +142,6 @@ class Player(GameObject):
 
 
     def still_connected(self):
-        return True # todo....
+        if self.time_since_last_moved() < Settings.player_disconnect_inactive_time:
+            return True
+        return False

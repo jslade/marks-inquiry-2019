@@ -9,6 +9,7 @@ from .player import Player
 from .pubnub_manager import PubNubManager
 from .settings import Settings
 from .snake import Snake
+from .snake_auto_follow import SnakeFollowObject
 from .snake_collider import SnakeCollider
 
 
@@ -38,6 +39,8 @@ class MultiplayerScene(GameScene):
 
         self.create_waiting_message()
         self.do_every(1000, self.check_waiting_players)
+        self.do_every(1000, self.snake_auto_follow)
+        self.do_every(5000, self.update_food)
 
     def create_snakes(self):
         self.snake_layer = Layer()
@@ -47,6 +50,7 @@ class MultiplayerScene(GameScene):
         self.food_colliders = []
         self.snake_positions = []
         self.snake_colliders = []
+        self.auto_follows = []
 
         for i in range(Settings.max_players):
             snake = Snake(color=Settings.snake_colors[i])
@@ -57,6 +61,10 @@ class MultiplayerScene(GameScene):
 
             collider = SnakeCollider(snake, on_touch=self.touched_food)
             self.food_colliders.append(collider)
+
+            follow = SnakeFollowObject(snake)
+            self.auto_follows.append(follow)
+            self.add_offscreen_object(follow)
 
         for snake in self.snakes:
             collider = SnakeCollider(snake, on_touch=self.touched_snake)
@@ -109,7 +117,7 @@ class MultiplayerScene(GameScene):
         self.score_layer.add_object(self.waiting_text)
 
     def hide_waiting_message(self):
-        self.log("Yay! We can play!")
+        #self.log("Yay! We can play!")
         self.score_layer.remove_object(self.waiting_text)
 
 
@@ -118,20 +126,51 @@ class MultiplayerScene(GameScene):
         self.food.append(food)
         self.food_layer.add_object(food)
         if where is None:
-            self.place_food(food)
+            self.place_food_randomly(food)
         else:
-            food.rect.center = where
+            food.set_placed(where)
         for collider in self.food_colliders:
             collider.add_object(food)
 
     def remove_food(self, food):
+        self.food.remove(food)
         self.food_layer.remove_object(food)
         for collider in self.food_colliders:
             collider.remove_object(food)
 
-    def place_food(self, food):
+    def place_food_randomly(self, food):
         food.rect.centerx = self.random_int(100, Settings.screen_width - 100)
         food.rect.centery = self.random_int(100, Settings.screen_height - 100)
+        food.placed = False
+
+    def update_food(self, _):
+        self.add_enough_food()
+
+        for i in range(self.active_player_count()):
+            self.move_one_piece_of_food()
+
+    def add_enough_food(self):
+        count_non_placed_food = 0
+        for food in self.food:
+            if not food.placed: count_non_placed_food += 1
+
+        food_to_add = self.max_food() - count_non_placed_food
+        for i in range(food_to_add):
+            self.do_after(500 * i, self.add_food)
+
+    def move_one_piece_of_food(self):
+        food = self.choose_random_food(placed_okay=False)
+        self.place_food_randomly(food)
+
+    def choose_random_food(self, placed_okay=True):
+        for food in self.food:
+            if food.placed and food.time_since_placed() < Settings.maximum_food_idle:
+                food.placed = False
+
+        while True:
+            food = self.food[self.random_int(0, len(self.food)-1)]
+            if food.placed and not placed_okay: continue
+            return food
 
     def max_food(self):
         return self.active_player_count() * Settings.food_per_player
@@ -143,15 +182,19 @@ class MultiplayerScene(GameScene):
         if len(self.food) > self.max_food():
             self.remove_food(food)
         else:
-            self.place_food(food)
+            self.place_food_randomly(food)
+
+        follow = self.auto_follows[snake.index]
+        if follow.get_target() == food:
+            follow.set_target(self.choose_random_food())
 
 
     def touched_obstacle(self, snake, obstacle):
-        self.log("Snake %s %s touched an obstacle (%d) at %s" % (snake.rect, snake.head_rect, snake.index, obstacle.rect))
+        #self.log("Snake %s %s touched an obstacle (%d) at %s" % (snake.rect, snake.head_rect, snake.index, obstacle.rect))
         self.kill_snake(snake)
 
     def touched_snake(self, snake, other_snake):
-        self.log("Snake touched another snake (%s --> %s)" % (snake.index, other_snake.index))
+        #self.log("Snake touched another snake (%s --> %s)" % (snake.index, other_snake.index))
         self.kill_snake(snake)
 
     def kill_snake(self, snake):
@@ -167,14 +210,12 @@ class MultiplayerScene(GameScene):
         snake.move_to(*self.snake_positions[snake.index])
         snake.set_velocity(Settings.snake_speed, 0)
 
-        food_to_add = self.max_food() - len(self.food)
-        for i in range(food_to_add):
-            self.do_after(500 * i, self.add_food)
-
         self.snake_layer.add_object(snake)
         self.add_offscreen_object(self.food_colliders[snake.index])
         self.add_offscreen_object(self.snake_colliders[snake.index])
         self.add_offscreen_object(self.obstacle_colliders[snake.index])
+
+        self.add_enough_food()
 
         self.hide_waiting_message()
 
@@ -184,7 +225,7 @@ class MultiplayerScene(GameScene):
         self.remove_offscreen_object(self.snake_colliders[snake.index])
         self.remove_offscreen_object(self.obstacle_colliders[snake.index])
         self.convert_dead_snake_to_food(snake)
-
+        self.auto_follows[snake.index].set_active(False)
 
     def convert_dead_snake_to_food(self, snake):
         n = 0
@@ -196,11 +237,27 @@ class MultiplayerScene(GameScene):
 
     def remove_snake_player(self, snake):
         player = self.players[snake.index]
+        self.log("Removing player %s from snake %d" % (player.id, snake.index))
+        player.set_snake(None)
         self.players[snake.index] = None
         self.remove_offscreen_object(player)
 
         if player.still_connected():
             self.add_waiting_player(player, cooldown=10000)
+
+
+    def snake_auto_follow(self, _=None):
+        for snake in self.snakes:
+            player = self.players[snake.index]
+            follow = self.auto_follows[snake.index]
+            if snake.dead or not player: continue
+            if player.time_since_last_moved() > Settings.maximum_player_idle:
+                player.set_idle()
+                if follow.get_target() is None or snake.time_since_last_growth() > Settings.maximum_snake_idle:
+                    follow.set_target(self.choose_random_food())
+            else:
+                player.reset_snake()
+                follow.set_target(None)
 
 
     def on_launcher_message(self, msg):
@@ -217,6 +274,7 @@ class MultiplayerScene(GameScene):
     def add_player(self, player):
         if player.snake is not None:
             self.log("Huh? player %s already connected to snake %d" % (player.id, player.snake.index))
+            player.reset_snake()
             return
 
         if self.active_player_count() < len(self.players):

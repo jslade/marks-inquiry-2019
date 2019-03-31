@@ -21,6 +21,7 @@ class Snake(BoundedObject):
         self.length = 0
         self.dead = False
         self.growing = 0
+        self.last_growth_at = self.now()
 
         self.snake_size_squared = Settings.snake_size * Settings.snake_size
 
@@ -70,7 +71,10 @@ class Snake(BoundedObject):
 
     def queue_growth(self, units):
         self.growing += units
+        self.last_growth_at = self.now()
 
+    def time_since_last_growth(self):
+        return self.elapsed_since(self.last_growth_at)
 
     def slither(self, millis):
         # Movement is done by growing the head vector at a fixed velocity

@@ -17,6 +17,12 @@ class Settings(object):
     ]
 
     max_players = 5
-    food_per_player = 3
+    food_per_player = 4
 
     obstacle_color = (20,20,20)
+
+    maximum_player_idle = 2000
+    maximum_snake_idle = 10000
+    maximum_food_idle = 30000
+
+    player_disconnect_inactive_time = 60000

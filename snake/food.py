@@ -9,6 +9,10 @@ class Food(BoundedObject):
     def __init__(self, scale=2.0, visual_scale=1.2):
         BoundedObject.__init__(self)
 
+        self.placed = False
+        self.placed_at = self.now()
+
+
         self.scale = scale
         self.visual_scale = visual_scale
 
@@ -46,3 +50,10 @@ class Food(BoundedObject):
         surface.blit(self.surface, self.rect.topleft)
         #self.draw.rect(surface, (0,255,0), self.rect, 2)
 
+    def set_placed(self, where):
+        self.rect.center = where
+        self.placed = True
+        self.placed_at = self.now()
+
+    def time_since_placed(self):
+        return self.elapsed_since(self.placed_at)

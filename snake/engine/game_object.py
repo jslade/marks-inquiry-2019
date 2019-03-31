@@ -86,6 +86,12 @@ class GameObject(object):
         event = self.pygame.event.Event(event_id, data)
         self.pygame.event.post(event)
 
+    def now(self):
+        return _pygame.time.get_ticks()
+
+    def elapsed_since(self, when):
+        return self.now() - when
+
     def do_after(self, millis, callback, data=None, **attrs):
         if data is None: data = attrs
 

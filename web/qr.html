@@ -5,12 +5,10 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  <title>Mark's Snake Project - Controller</title>
+  <title>Mark's Snake Project</title>
 
-  <meta name="description" content="Controller for Mark's multiplayer snake game">
-  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=0.5, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="description" content="Launcher for joining Mark's multiplayer snake game via a phone">
+  <meta name="viewport" content="width=device-width, target-densityDpi=device-dpi, initial-scale=1.0">
 
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="./css/styles.css">
@@ -21,19 +19,17 @@
   <script type="text/javascript" src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.23.0.min.js"></script>
 
   <script src="js/pubnub.js"></script>
-  <script src="js/controller.js"></script>
+  <script src="js/launcher.js"></script>
 </head>
 
 <body>
-  <div id="content" class="center">
-    <div id="playerID"></div>
-    <div id="score"></div>
-    <div id="controls">
-      <svg height="500" width="500" id="svg">
-        <circle cx="250" cy="250" r="200" stroke="black" stroke-width="3" fill="white" id="rim" />
-        <circle cx="250" cy="250" r="60" stroke="black" stroke-width="3" fill="red" id="knob"/>
-      </svg>
-    </div>
+  <div id="instructions" class="center">
+    <h1>Loading...</h1>
+    <div id="qrcode" class="center"></div>
+  </div>
+
+  <div id="presence">
+    <span class=".presence"></span>
   </div>
 </body>
 </html>

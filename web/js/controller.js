@@ -26,15 +26,31 @@ var resizeControls = function() {
   rim.el.attr("r", rim.radius);
 };
 
+var getPlayerID = function() {
+  var randomID = Math.floor(Math.random() * 10000);
+
+  if (typeof(Storage) !== "undefined") {
+    var lastID = sessionStorage.getItem("snake-playerID");
+    if (lastID !== null) {
+      return lastID;
+    } else {
+      sessionStorage.setItem("snake-playerID", randomID);
+      return randomID;
+    }
+  } else {
+    return randomID;
+  }
+};
 
 var pubnub = window.pubnub;
 
 pubnub.connect = function () {
-  pubnub.playerID = Math.floor(Math.random() * 10000);
+  pubnub.playerID = getPlayerID();
   pubnub.playerChannel = 'player.' + pubnub.playerID;
   pubnub.gameChannel = 'game';
 
   console.log(`playerID=${pubnub.playerID}`);
+  $('#playerID').text(`playerID=${pubnub.playerID}`)
 
   pubnub.pn.subscribe({
     channels: [pubnub.gameChannel, pubnub.playerChannel + '.back'],
@@ -80,8 +96,7 @@ pubnub.publish = function (msg) {
 
 
 var on_set_snake = function (msg) {
-  $('#svg').css({'background-color': `rgb(${msg.color.r},${msg.color.g},${msg.color.b})`})
-  $('#score').css({ 'background-color': `rgb(${msg.color.r},${msg.color.g},${msg.color.b})` })
+  $('#svg').css({ 'background-color': `rgb(${msg.color.r},${msg.color.g},${msg.color.b})` })
   $('#score').text(msg.length)
 }
 
@@ -89,6 +104,10 @@ var on_growth = function (msg) {
   $('#score').text(msg.length)
 }
 
+var on_waiting = function (msg) {
+  $('#score').text("WAITING")
+  $('#svg').css({'background-color': 'white'})
+}
 
 var relativeLocation = function(elem, evt) {
   var offs = elem.offset();
@@ -176,6 +195,10 @@ $(document).ready(function () {
   makeKnobDraggable();
   pubnub.connect();
 
+  pubnub.callbacks.no_snake = on_waiting
   pubnub.callbacks.set_snake = on_set_snake
   pubnub.callbacks.growth = on_growth
+  pubnub.callbacks.waiting = on_waiting
+
+  on_waiting();
 });
