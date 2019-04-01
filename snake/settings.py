@@ -1,7 +1,7 @@
 
 class Settings(object):
     screen_width = 1200
-    screen_height = 900
+    screen_height = 800
     target_fps = 60
 
     snake_size = 10

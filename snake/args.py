@@ -11,9 +11,16 @@ class ArgParser(object):
                                action='store_true',
                                help='Run in playground mode')
 
+        self.parser.add_option('--width', dest='width', default=1200,
+                               help='Screen width')
+        self.parser.add_option('--height', dest='height', default=800,
+                               help='Screen height')
+
 
     def set_opts(self, opts):
         Settings.playground = opts.playground
+        Settings.screen_width = int(opts.width)
+        Settings.screen_height = int(opts.height)
 
 
     def parse(self, args):
