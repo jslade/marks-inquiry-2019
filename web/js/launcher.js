@@ -9,6 +9,7 @@ var showJoinCode = function() {
   }
   link += "/controller.html"
 
+  $('#link').text(link);
   new QRCode($('#qrcode')[0], link);
 };
 
