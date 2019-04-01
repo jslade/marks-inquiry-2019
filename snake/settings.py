@@ -5,8 +5,14 @@ class Settings(object):
     target_fps = 60
 
     snake_size = 10
-    snake_speed = snake_size * 10 / 1000.0
     snake_turn_rate = 180 / 1000.0
+    snake_speed = snake_size * 10 / 1000.0
+
+    snake_speed_boost = 0.05
+    snake_speed_boost_max = 1.5
+    snake_speed_boost_duration = 3000
+
+    snake_speed_decay = 0.7 / 300 # Decays to 70% speed by length 300
 
     snake_colors = [
       (0, 200, 100), # green

@@ -20,8 +20,12 @@ class Snake(BoundedObject):
         self.tail_pt = None
         self.length = 0
         self.dead = False
+
         self.growing = 0
         self.last_growth_at = self.now()
+
+        self.speed_boost = 1.0
+        self.speed_decay = 1.0
 
         self.snake_size_squared = Settings.snake_size * Settings.snake_size
 
@@ -61,6 +65,22 @@ class Snake(BoundedObject):
         self.velocity.from_polar( (speed, angle) )
         self.head_vector.x = self.head_vector.y = 0
 
+    def boost_speed(self, amount, duration):
+        if self.speed_boost >= Settings.snake_speed_boost_max:
+            return
+
+        self.speed_boost += amount
+
+        if duration > 0:
+            self.do_after(duration, self.boost_speed_ended, amount=amount)
+
+    def boost_speed_ended(self, data):
+        if self.speed_boost > 1.0:
+            self.speed_boost -= data['amount']
+
+    def decay(self, amount):
+        self.speed_decay -= amount
+
     def get_heading(self):
         mag, dir = self.velocity.as_polar()
         return dir
@@ -79,7 +99,7 @@ class Snake(BoundedObject):
     def slither(self, millis):
         # Movement is done by growing the head vector at a fixed velocity
         # Once the head vector is long enough, then move the body points
-        self.head_vector += self.velocity * millis
+        self.head_vector += self.velocity * millis * self.speed_boost * self.speed_decay
         self.extend_head()
         self.update_bounds()
 

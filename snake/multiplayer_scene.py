@@ -109,6 +109,7 @@ class MultiplayerScene(GameScene):
     def on_growth(self, event):
         snake = event.snake
         self.update_snake_score(snake)
+        snake.decay(Settings.snake_speed_decay) # Get slower as it gets longer
 
     def update_snake_score(self, snake):
         text = self.score_text[snake.index]
@@ -215,6 +216,9 @@ class MultiplayerScene(GameScene):
 
     def touched_food(self, snake, food):
         snake.queue_growth(4)
+
+        # A temporary speed boost
+        snake.boost_speed(Settings.snake_speed_boost, Settings.snake_speed_boost_duration)
 
         if len(self.food) > self.max_food():
             self.remove_food(food)
