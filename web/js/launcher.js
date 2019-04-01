@@ -1,11 +1,13 @@
 var showJoinCode = function() {
-  $('#instructions h1').text('Scan the QR code to join the next game');
+  //$('#instructions h1').text('Scan the QR code to join the next game');
 
   var link =
     window.location.protocol + "//" +
-    window.location.hostname + ":" +
-    window.location.port +
-    "/controller.html"
+    window.location.hostname;
+  if (window.location.port) {
+    link += ":" + window.location.port;
+  }
+  link += "/controller.html"
 
   new QRCode($('#qrcode')[0], link);
 };
