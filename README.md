@@ -90,3 +90,17 @@ Only the `web` subtree is deployed to heroku, rather than the full repo:
 heroku login
 git subtree push --prefix web heroku master
 ```
+
+### PubNub and Pygame
+
+PubNub and pygame don't actually work very well together -- at least not very performant. PubNub runs
+multiple threads, and that it makes it hard to keep a high or smooth frame rate while receiving
+lots of messages.
+
+I ended up using the python `multiprocessing` module to make all the PubNub stuff run in a separate
+process. The `multiprocessing.Pipe` / `multiprocessing.Connection` made it really simple to transport
+messages between the process, so that part ended up working really nicely.
+
+After re-architecting with `multiprocessing`, the game is able to easily maintain ~60 FPS even with
+5 players simultaneously connected. PubNub is really a pretty cool service.
+
