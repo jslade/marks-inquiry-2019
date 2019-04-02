@@ -19,7 +19,7 @@ class PlayScene(GameScene):
         snake_layer.add_object(self.snake)
         self.snake.move_to(int(Settings.screen_width / 2), int(Settings.screen_height / 2))
         self.snake.set_velocity(Settings.snake_speed, 0)
-        
+
         self.food = Food()
         snake_layer.add_object(self.food)
         self.place_food()
@@ -32,10 +32,12 @@ class PlayScene(GameScene):
 
         self.on_event(self.pygame.KEYDOWN, self.key_pressed)
 
+        with open('bite.wav', 'rb') as f:
+            self.bite = self.pygame.mixer.Sound(f.read())
         with open('sad.wav', 'rb') as f:
             self.sad_trombone = self.pygame.mixer.Sound(f.read())
-        
-    
+
+
     def key_pressed(self, event):
         if event.key == self.pygame.K_ESCAPE:
             self.esc_pressed()
@@ -67,10 +69,10 @@ class PlayScene(GameScene):
 
     def turn_down(self):
         self.snake.set_velocity(Settings.snake_speed, 90)
-    
+
     def turn_left(self):
         self.snake.set_velocity(Settings.snake_speed, 180)
-    
+
     def turn_right(self):
         self.snake.set_velocity(Settings.snake_speed, 0)
 
@@ -80,6 +82,7 @@ class PlayScene(GameScene):
 
     def touched_food(self, snake, food):
         self.place_food()
+        self.bite.play()
         self.snake.queue_growth(10)
 
     def touched_snake(self, snake, _):
