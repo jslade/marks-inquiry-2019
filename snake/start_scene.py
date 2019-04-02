@@ -12,6 +12,7 @@ from .play_scene import PlayScene
 class StartScene(GameScene):
     def on_activated(self, screen):
         button_layer = Layer(mousable=True)
+        button_layer.set_background((0, 0, 0))
         self.add_layer(button_layer)
 
         button = Button(text='Single player', action=self.play_button_clicked, color=(1,128,1), hover_color=(0,200,0), text_color=(255,00,00))
