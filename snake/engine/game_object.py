@@ -7,6 +7,7 @@ class GameObject(object):
     @staticmethod
     def init():
         _pygame.init()
+        _pygame.mixer.init()
         GameObject.seed()
 
     named_instances = {}
