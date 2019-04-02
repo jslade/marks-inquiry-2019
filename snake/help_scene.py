@@ -3,6 +3,7 @@ from .engine.bounded_object import BoundedObject
 from .engine.game_scene import GameScene
 from .engine.layer import Layer
 from .engine.game_object import GameObject
+from .text_box import TextBox
 
 
 class HelpScene(GameScene):
@@ -16,11 +17,26 @@ class HelpScene(GameScene):
         button.rect = self.Rect(100,100,100,40)
         button_layer.add_object(button)
 
+
+        text_box = TextBox(
+            text= ['This is a snake game.', 'The goal is to eat apples to grow,', 'and not touch yorself or the walls.'],
+            color=(1,128,1),
+            text_color=(255,255,255)
+            
+        )
+        text_box.rect.topleft = (100, 200 )
+        button_layer.add_object(text_box)
+
+
     def back_button_clicked(self, event):
         from .start_scene import StartScene
         self.log("It work!")
         game_loop = GameObject.find_by_name('GameLoop')
         game_loop.set_scene(StartScene())
+        
+    
+    
+        
 
     
     
